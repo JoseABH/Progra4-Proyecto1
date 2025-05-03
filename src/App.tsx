@@ -1,13 +1,12 @@
 
 import './App.css'
+import TablaEmpleados from './components/TablaEmpleados'
 
 function App() {
  
 
   return (
-    <>
-      <h1>Proyecto 1</h1>
-    </>
+    <TablaEmpleados/>
   )
 }
 
