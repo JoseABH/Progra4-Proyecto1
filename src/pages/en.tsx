@@ -2,7 +2,7 @@
 // import { useContext } from "react";
 // import Login from "../Components/Login";
 // import Welcome from "../Components/Welcome";
-import NavBar from "../components/NavBar"
+
 const en = () => {
     // const { user } = useContext(AuthContext);
 

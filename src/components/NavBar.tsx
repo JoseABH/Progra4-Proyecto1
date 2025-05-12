@@ -1,6 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthContext";
+import '../App.css';
+import { MdMapsHomeWork } from "react-icons/md";
+import { FaCalendarAlt } from "react-icons/fa";
+
+import BotonNavBar from "./BotonNavBar";
 
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
@@ -9,18 +14,18 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     const { user } = context;
 
     return (
-        <div className="flex flex-col h-screen m-0">
+        <div className="flex flex-col h-screen w-screen m-0">
             {/* Barra superior */}
-            <header className="bg-gray-800 text-white h-16 px-6 flex items-center justify-between shadow m-1.5">
-                <div className="text-xl font-bold">🌟 Centro Agricola de Puntarenas</div>
+            <header className="headerNav bg-sky-900 text-white px-6 flex items-center justify-between shadow m-1.5 rounded-lg ">
+                <div className="text-xl font-bold flex items-center gap-2"><MdMapsHomeWork /> Centro Agricola de Puntarenas</div>
                 <div className="text-sm">👤 {user || "Invitado"}</div>
             </header>
 
             {/* Contenedor principal: Sidebar + contenido */}
-            <div className="flex flex-1 w-screen mx-1.5 mb-6 ">
+            <div className="sidebarPrincipal flex mx-1.5 ">
                 {/* Sidebar lateral colapsado */}
-                <aside className="group relative bg-gray-900 text-white transition-all duration-300 h-full w-16 hover:w-64 overflow-hidden flex flex-col rounded-lg ">
-                    <nav className="mt-10 space-y-4 px-4">
+                <aside className="group relative bg-sky-900 text-white transition-all duration-300 h-full w-16 hover:w-64 overflow-hidden flex flex-col rounded-lg ">
+                    <nav className="mt-10 space-y-4 px-2">
                         <Link to="/" className="flex items-center gap-3 hover:text-gray-300">
                             <span>🏠</span>
                             <span className="hidden group-hover:inline">Home</span>
@@ -34,10 +39,19 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                             <span className="hidden group-hover:inline">English</span>
                         </Link>
 
+                        <Link to="/solicitudes" className="flex items-center gap-3 hover:text-gray-300">
+                            <span>🌐</span>
+                            <span className="hidden group-hover:inline">Solicitudes</span>
+                        </Link>
+                        <BotonNavBar path="/GestionSolicitudes" icono={<FaCalendarAlt />} nombre="Gestion Solicitudes" ></BotonNavBar>
+                        
+
+
                         <Link to="/User" className="flex items-center gap-3 hover:text-gray-300">
                             <span>👥</span>
                             <span className="hidden group-hover:inline">Gestion de Usarios</span>
                         </Link>
+
                     </nav>
 
                     <div className="mt-auto px-4 pb-4">
@@ -49,7 +63,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 </aside>
 
                 {/* Contenido principal */}
-                <main className="flex-1 p-6 bg-gray-500 overflow-y-auto ml-1.5 rounded-lg">
+                <main className="mainPrincipal flex-1 p-6 overflow-y-auto ml-1.5 bg-white rounded-lg">
                     {children}
                 </main>
             </div>
