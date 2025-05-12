@@ -42,8 +42,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                             <span className="hidden group-hover:inline">Solicitudes</span>
                         </Link>
                         <BotonNavBar path="/GestionSolicitudes" icono={<FaCalendarAlt />} nombre="Gestion Solicitudes" ></BotonNavBar>
-                        <BotonNavBar path="/" icono="🏠" nombre="Home" ></BotonNavBar>
-                        <BotonNavBar path="/" icono="🏠" nombre="Home" ></BotonNavBar>
+                        
                     </nav>
 
                     <div className="mt-auto px-4 pb-4">
