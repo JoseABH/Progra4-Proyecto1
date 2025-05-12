@@ -4,6 +4,8 @@ import { AuthContext } from '../Context/AuthContext'
 import { useContext } from 'react'
 import HomePage from './HomePage'
 import { useNavigate } from '@tanstack/react-router'
+
+
 export default function Login() {
     const context = useContext(AuthContext)
 

@@ -2,10 +2,12 @@ import RootLayout from "./components/RootLayout";
 import en from "./pages/en";
 import HomePage from "./pages/HomePage"
 import LoginPage from "./pages/LoginPage";
+import UserPage from "./pages/UserPage";
 
 
 
 import { createRootRoute, createRoute, createRouter, createBrowserHistory } from "@tanstack/react-router";
+
 
 const rootRoute = createRootRoute({
     component: RootLayout,
@@ -29,11 +31,20 @@ const empleadosRoute = createRoute({
     component: en,
 });
 
+const userRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/user",
+    component: UserPage,
+});
+
+
+
 
 rootRoute.addChildren([
     homeRoute,
     loginRoute,
     empleadosRoute,
+    userRoute
 ])
 
 const router = createRouter({
