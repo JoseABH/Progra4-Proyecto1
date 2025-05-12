@@ -7,6 +7,7 @@ import { FaCalendarAlt } from "react-icons/fa";
 
 import BotonNavBar from "./BotonNavBar";
 
+
 const Layout = ({ children }: { children: React.ReactNode }) => {
     const context = useContext(AuthContext);
     if (!context) throw new Error("Layout debe estar dentro de un AuthProvider");
@@ -37,17 +38,25 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                             <span>🌐</span>
                             <span className="hidden group-hover:inline">English</span>
                         </Link>
+
                         <Link to="/solicitudes" className="flex items-center gap-3 hover:text-gray-300">
                             <span>🌐</span>
                             <span className="hidden group-hover:inline">Solicitudes</span>
                         </Link>
                         <BotonNavBar path="/GestionSolicitudes" icono={<FaCalendarAlt />} nombre="Gestion Solicitudes" ></BotonNavBar>
                         
+
+
+                        <Link to="/User" className="flex items-center gap-3 hover:text-gray-300">
+                            <span>👥</span>
+                            <span className="hidden group-hover:inline">Gestion de Usarios</span>
+                        </Link>
+
                     </nav>
 
                     <div className="mt-auto px-4 pb-4">
                         <div className="flex items-center gap-3 text-sm text-gray-400">
-                            <span>👤</span>
+                            <span></span>
                             <span className="hidden group-hover:inline">Cerrar sesion</span>
                         </div>
                     </div>
