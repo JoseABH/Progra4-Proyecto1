@@ -1,100 +1,233 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useReactTable, getCoreRowModel, ColumnDef } from '@tanstack/react-table';
-import { FiEye, FiEdit, FiTrash2, FiCalendar } from 'react-icons/fi';
-import { fetchUsers } from '../service/UserSevice';
+import { FiEdit, FiTrash2, FiRefreshCw, FiPlus } from 'react-icons/fi';
+import { fetchUsers, createUser, updateUser, deleteUser } from '../services/userSevice';
+import { User } from '../types/user';
+import UserForm from './UserForm';
 
-type User = {
-    id: number;
-    name: string;
-    email: string;
-    password: string;
-    role: 'admin' | 'user' | 'moderator' | 'pendiente' | 'aprobada';
+// Extend User type to include onEdit and onDelete
+type TableUser = User & {
+  onEdit?: (user: User) => void;
+  onDelete?: (id: number) => void;
 };
 
-const columns: ColumnDef<User>[] = [
-    { header: 'ID', accessorKey: 'id' },
-    { header: 'Nombre', accessorKey: 'name' },
-    { header: 'Email', accessorKey: 'email' },
-    { header: 'Rol', accessorKey: 'role' },
+const columns: ColumnDef<TableUser>[] = [
+  { header: 'ID', accessorKey: 'id' },
+  { header: 'Nombre', accessorKey: 'name' },
+  { header: 'Email', accessorKey: 'email' },
+  {
+    header: 'Rol',
+    accessorKey: 'role',
+    cell: (info) => <StatusBadge type={info.getValue() as User['role']} />,
+  },
+  {
+    header: 'Acciones',
+    id: 'acciones',
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <button
+          onClick={() => row.original.onEdit?.(row.original)}
+          className="bg-blue-800 text-white px-3 py-1 rounded hover:bg-blue-700 transition text-sm flex items-center"
+        >
+          <FiEdit className="mr-1" /> Editar
+        </button>
+        <button
+          onClick={() => row.original.onDelete?.(row.original.id)}
+          className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition text-sm flex items-center"
+        >
+          <FiTrash2 className="mr-1" /> Eliminar
+        </button>
+      </div>
+    ),
+  },
 ];
 
-const StatusBadge = ({ type }: { type: 'admin' | 'user' | 'moderator' | 'pendiente' | 'aprobada' }) => {
-    const styles = {
-        'admin': 'bg-yellow-100 text-yellow-800',
-        'user': 'bg-gray-100 text-gray-600',
-        'moderator': 'bg-green-100 text-green-800',
-        'pendiente': 'bg-yellow-100 text-yellow-800',
-        'aprobada': 'bg-green-100 text-green-800'
-    };
+const StatusBadge = ({ type }: { type: User['role'] }) => {
+  const styles = {
+    'Usuario Comun': 'bg-gray-100 text-gray-600',
+    'Jefe de Departamento': 'bg-green-100 text-green-800',
+    'Jefe de RRHH': 'bg-yellow-100 text-yellow-800',
+  };
 
-    return (
-        <span className={`text-xs px-2 py-1 rounded-full ${styles[type] || 'bg-gray-100 text-gray-800'}`}>
-            {type.charAt(0).toUpperCase() + type.slice(1)}
-        </span>
-    );
+  const validType = styles[type] ? type : 'Usuario Comun';
+
+  return (
+    <span className={`text-xs px-2 py-1 rounded-full ${styles[validType]}`}>
+      {validType}
+    </span>
+  );
 };
 
 const UserTable: React.FC = () => {
-    const [users, setUsers] = useState<User[]>([]);
-    const [filter, setFilter] = useState('');
+  const [users, setUsers] = useState<User[]>([]);
+  const [filter, setFilter] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
-    useEffect(() => {
-        const loadUsers = async () => {
-            const data = await fetchUsers();
-            setUsers(data);
-        };
-        loadUsers();
-    }, []);
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchUsers();
+      setUsers(Array.isArray(data) ? data : []);
+      setError(null);
+    } catch (err) {
+      setError('No se pudieron cargar los usuarios.');
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const filteredData = useMemo(() => users.filter(user => user.name.toLowerCase().includes(filter.toLowerCase())), [filter, users]);
+  const handleAddUser = async (userData: Omit<User, 'id'>) => {
+    try {
+      await createUser(userData);
+      await loadUsers();
+      setShowForm(false);
+    } catch (err) {
+      setError('No se pudo agregar el usuario.');
+    }
+  };
 
-    const table = useReactTable({
-        data: filteredData,
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-    });
+  const handleEditUser = async (user: User) => {
+    try {
+      await updateUser(user);
+      await loadUsers();
+      setShowForm(false);
+      setEditingUser(null);
+    } catch (err) {
+      setError('No se pudo actualizar el usuario.');
+    }
+  };
 
-    return (
-        <div className="p-6 bg-white rounded-xl shadow-md space-y-6">
-            <h2 className="text-xl font-bold text-gray-800">👥 Lista de Usuarios</h2>
-            <input
-                type="text"
-                placeholder="🔍 Filtrar por nombre..."
-                value={filter}
-                onChange={e => setFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:outline-none text-black placeholder-gray-500"
-            />
+  const handleDeleteUser = async (userId: number) => {
+    if (window.confirm('¿Estás seguro de eliminar este usuario?')) {
+      try {
+        await deleteUser(userId);
+        await loadUsers();
+      } catch (err) {
+        setError('No se pudo eliminar el usuario.');
+      }
+    }
+  };
 
-            <div className="space-y-4">
-                {table.getRowModel().rows.map(row => (
-                    <div key={row.original.id} className="border border-gray-200 rounded-lg p-4 shadow-sm bg-white hover:shadow-md transition">
-                        <div className="flex justify-between items-start">
-                            <div className="space-y-2">
-                                <div className="flex items-center space-x-2 mb-1">
-                                    <span className="font-medium text-gray-900">{row.original.name}</span>
-                                    <StatusBadge type={row.original.role} />
-                                </div>
-                                <p className="text-gray-700 text-sm">
-                                    <FiCalendar className="inline mr-1" /> Registro: {new Date().toLocaleDateString()}
-                                </p>
-                            </div>
-                            <div className="flex space-x-2">
-                                <button className="bg-black text-white px-3 py-1 rounded hover:bg-gray-800 transition text-sm flex items-center">
-                                    <FiEye className="mr-1" /> Ver
-                                </button>
-                                <button className="bg-blue-800 text-white px-3 py-1 rounded hover:bg-blue-700 transition text-sm flex items-center">
-                                    <FiEdit className="mr-1" /> Editar
-                                </button>
-                                <button className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition text-sm flex items-center">
-                                    <FiTrash2 className="mr-1" /> Eliminar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const filteredData = useMemo(
+    () =>
+      users.map((user) => ({
+        ...user,
+        onEdit: (u: User) => {
+          setEditingUser(u);
+          setShowForm(true);
+        },
+        onDelete: handleDeleteUser,
+      })),
+    [users]
+  );
+
+  const table = useReactTable({
+    data: filteredData,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <div className="p-6 bg-white rounded-xl shadow-md space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold text-gray-800">👥 Lista de Usuarios</h2>
+        <div className="flex space-x-2">
+          <button
+            onClick={loadUsers}
+            className="flex items-center gap-1 px-3 py-1 bg-gray-800 text-white text-sm rounded hover:bg-gray-700 transition"
+          >
+            <FiRefreshCw /> Actualizar
+          </button>
+          <button
+            onClick={() => {
+              setEditingUser(null);
+              setShowForm(true);
+            }}
+            className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition"
+          >
+            <FiPlus /> Agregar
+          </button>
         </div>
-    );
+      </div>
+
+      <input
+        type="text"
+        placeholder="🔍 Filtrar por nombre..."
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+        className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:outline-none text-black placeholder-gray-500"
+      />
+
+      {loading && <p className="text-gray-600">Cargando usuarios...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      <div className="space-y-4">
+        {!loading &&
+          !error &&
+          table.getRowModel().rows.map((row) => (
+            <div
+              key={row.original.id}
+              className="border border-gray-200 rounded-lg p-4 shadow-sm bg-white hover:shadow-md transition"
+            >
+              <div className="flex justify-between items-start">
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className="font-medium text-gray-900">{row.original.name}</span>
+                    <StatusBadge type={row.original.role} />
+                  </div>
+                  <p className="text-gray-700 text-sm">Email: {row.original.email}</p>
+                  {row.original.id_empleado && (
+                    <p className="text-gray-700 text-sm">
+                      Empleado asociado: {users.find(u => u.id === row.original.id_empleado)?.name || 'Desconocido'}
+                    </p>
+                  )}
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => {
+                      setEditingUser(row.original);
+                      setShowForm(true);
+                    }}
+                    className="bg-blue-800 text-white px-3 py-1 rounded hover:bg-blue-700 transition text-sm flex items-center"
+                  >
+                    <FiEdit className="mr-1" /> Editar
+                  </button>
+                  <button
+                    onClick={() => handleDeleteUser(row.original.id)}
+                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition text-sm flex items-center"
+                  >
+                    <FiTrash2 className="mr-1" /> Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+      </div>
+
+      {showForm && (
+        <UserForm
+          user={editingUser ? editingUser : undefined}
+          onSave={(userData) =>
+            editingUser
+              ? handleEditUser(userData as User)
+              : handleAddUser(userData as Omit<User, 'id'>)
+          }
+          onCancel={() => {
+            setShowForm(false);
+            setEditingUser(null);
+          }}
+        />
+      )}
+    </div>
+  );
 };
 
 export default UserTable;

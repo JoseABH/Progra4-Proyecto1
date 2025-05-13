@@ -56,7 +56,7 @@ const crearSolicitudesRoute = createRoute({
 });
 const userRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: "/user",
+    path: "/GestionUsers",
     component: UserPage,
 });
 
