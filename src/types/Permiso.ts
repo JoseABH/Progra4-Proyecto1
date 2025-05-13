@@ -1,18 +1,13 @@
 export type EstadoGeneral = "Pendiente" | "Aprobado" | "Rechazado";
 
-export type EstadoProceso =
-  | "Pendiente de Jefe de Departamento"
-  | "Aprobado por Jefe de Departamento"
-  | "Rechazado por Jefe de Departamento"
-  | "Pendiente de Recursos Humanos"
-  | "Aprobado por Recursos Humanos"
-  | "Rechazado por Recursos Humanos";
+export type EstadoProceso = "Jefe de Departamento" | "Recursos Humanos" | "Dirección";
+
 
 export type Permiso = {
   id: number;
   empleado: string;
   motivo: string;
-  tipo: string;
+  tipo : "Vacaciones" | "Permiso personal";
   fechaInicio: string;
   fechaFin: string;
   estadoGeneral: EstadoGeneral;
