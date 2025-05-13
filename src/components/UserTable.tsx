@@ -1,9 +1,10 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useReactTable, getCoreRowModel, ColumnDef } from '@tanstack/react-table';
 import { FiEdit, FiTrash2, FiRefreshCw, FiPlus } from 'react-icons/fi';
-import { fetchUsers, createUser, updateUser, deleteUser } from '../services/userSevice';
+import { fetchUsers, createUser, updateUser, deleteUser } from '../services/userSevice'; // Correct import
 import { User } from '../types/user';
 import UserForm from './UserForm';
+
 
 // Extend User type to include onEdit and onDelete
 type TableUser = User & {
@@ -70,6 +71,7 @@ const UserTable: React.FC = () => {
     try {
       setLoading(true);
       const data = await fetchUsers();
+      console.log('Fetched users:', data); // Debug log
       setUsers(Array.isArray(data) ? data : []);
       setError(null);
     } catch (err) {
@@ -121,6 +123,7 @@ const UserTable: React.FC = () => {
       users.map((user) => ({
         ...user,
         onEdit: (u: User) => {
+          console.log('Editing user:', u); // Debug log
           setEditingUser(u);
           setShowForm(true);
         },
@@ -135,6 +138,8 @@ const UserTable: React.FC = () => {
     getCoreRowModel: getCoreRowModel(),
   });
 
+  console.log('Rendering UserTable, showForm:', showForm); // Debug log
+
   return (
     <div className="p-6 bg-white rounded-xl shadow-md space-y-6">
       <div className="flex justify-between items-center">
@@ -148,6 +153,7 @@ const UserTable: React.FC = () => {
           </button>
           <button
             onClick={() => {
+              console.log('Opening form for adding user'); // Debug log
               setEditingUser(null);
               setShowForm(true);
             }}
@@ -186,13 +192,14 @@ const UserTable: React.FC = () => {
                   <p className="text-gray-700 text-sm">Email: {row.original.email}</p>
                   {row.original.id_empleado && (
                     <p className="text-gray-700 text-sm">
-                      Empleado asociado: {users.find(u => u.id === row.original.id_empleado)?.name || 'Desconocido'}
+                      Empleado asociado: {users.find(u => u.id === row.original.id)?.id || 'Desconocido'}
                     </p>
                   )}
                 </div>
                 <div className="flex space-x-2">
                   <button
                     onClick={() => {
+                      console.log('Opening form for editing user:', row.original); // Debug log
                       setEditingUser(row.original);
                       setShowForm(true);
                     }}
@@ -221,6 +228,7 @@ const UserTable: React.FC = () => {
               : handleAddUser(userData as Omit<User, 'id'>)
           }
           onCancel={() => {
+            console.log('Closing form'); // Debug log
             setShowForm(false);
             setEditingUser(null);
           }}
