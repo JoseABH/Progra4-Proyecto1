@@ -3,6 +3,7 @@ import en from "./pages/en";
 import GestionPermisosPage from "./pages/GestionPermisosPage";
 import HomePage from "./pages/HomePage"
 import LoginPage from "./pages/LoginPage";
+import NuevaSolicitudPage from "./pages/NuevaSolicitudPage";
 
 import SolicitudesPage from "./pages/SolicitudPage"
 
@@ -48,7 +49,11 @@ const gestionSolicitudesRoute = createRoute({
     path: "/GestionSolicitudes",
     component: GestionPermisosPage,
 });
-
+const crearSolicitudesRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/CrearSolicitudes",
+    component: NuevaSolicitudPage,
+});
 const userRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/GestionUsers",
@@ -65,6 +70,7 @@ rootRoute.addChildren([
 
     solicitudesRoute,
     gestionSolicitudesRoute,
+    crearSolicitudesRoute,
 
     userRoute
 

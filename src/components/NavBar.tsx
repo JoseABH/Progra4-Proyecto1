@@ -42,6 +42,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                             <span>🌐</span>
                             <span className="hidden group-hover:inline">Solicitudes</span>
                         </Link>
+                        <BotonNavBar path="/CrearSolicitudes" icono={<FaCalendarAlt />} nombre="Crear Solicitudes" ></BotonNavBar>
                         <BotonNavBar path="/GestionSolicitudes" icono={<FaCalendarAlt />} nombre="Gestion Solicitudes" ></BotonNavBar>
                            <BotonNavBar path="/GestionUsers" icono={<FaUserCog />} nombre="Gestion Usuarios" ></BotonNavBar>
 

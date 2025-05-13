@@ -13,11 +13,13 @@ export function usePermisos() {
     });
   }, []);
 
-  const addPermiso = (nuevo: Permiso) => {
-    const nuevos = [...permisos, nuevo];
-    setPermisos(nuevos);
-    permisoService.updateAll(nuevos);
-  };
+const addPermiso = (nuevo: Omit<Permiso, "id">) => {
+  const nuevoConId: Permiso = { id: Date.now(), ...nuevo };
+  const nuevos = [...permisos, nuevoConId];
+  setPermisos(nuevos);
+  permisoService.updateAll(nuevos);
+};
+
 
   const updatePermiso = (id: number, actualizado: Permiso) => {
     const nuevos = permisos.map(p => (p.id === id ? actualizado : p));
