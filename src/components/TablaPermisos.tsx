@@ -7,7 +7,7 @@ import {
 import { Permiso } from "../types/Permiso";
 import { usePermisos } from "../hooks/usePermisos";
 import { useState, useMemo } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import {Trash2 } from "lucide-react";
 
 const TablaPermisos = () => {
   const { permisos, loading, deletePermiso } = usePermisos();
