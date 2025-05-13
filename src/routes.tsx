@@ -4,6 +4,7 @@ import GestionEmpleadosPage from "./pages/GestionEmpleadosPage";
 import GestionPermisosPage from "./pages/GestionPermisosPage";
 import HomePage from "./pages/HomePage"
 import LoginPage from "./pages/LoginPage";
+import NuevaSolicitudPage from "./pages/NuevaSolicitudPage";
 
 import SolicitudesPage from "./pages/SolicitudPage"
 
@@ -55,10 +56,14 @@ const gestionSolicitudesRoute = createRoute({
     path: "/GestionSolicitudes",
     component: GestionPermisosPage,
 });
-
+const crearSolicitudesRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/CrearSolicitudes",
+    component: NuevaSolicitudPage,
+});
 const userRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: "/user",
+    path: "/GestionUsers",
     component: UserPage,
 });
 
@@ -72,6 +77,7 @@ rootRoute.addChildren([
     GestionEmpleadosRoute,    
     solicitudesRoute,
     gestionSolicitudesRoute,
+    crearSolicitudesRoute,
 
     userRoute
 

@@ -8,7 +8,7 @@ export default function UserPage() {
         <h1 className="">Gestión de usuarios </h1>
         <p className="">Administra eficientemente todos los perfiles y solicitudes del sistema.</p>
 
-        <UserTable />
+        <UserTable/>
       </div>
     </div>
   );
