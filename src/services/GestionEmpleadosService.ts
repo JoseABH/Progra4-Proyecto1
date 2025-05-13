@@ -22,7 +22,7 @@ export async function getEmpleados(): Promise<Employee[]> {
     headers: readHeaders,
   });
   if (!res.ok) throw new Error(`getEmpleados: ${res.status}`);
-
+  
   const json = await res.json();
   // JSONBin v3 puede devolver json.record === Employee[] o json.record === { record: Employee[] }
   const data = Array.isArray(json.record)

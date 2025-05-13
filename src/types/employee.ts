@@ -6,3 +6,4 @@ export interface Employee {
   cargo: string
   estado: 'Activo' | 'Ausente' | 'Terminado'
 }
+
