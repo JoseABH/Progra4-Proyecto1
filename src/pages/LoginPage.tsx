@@ -19,7 +19,7 @@ const context = useContext(AuthContext);
      
     :<div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Iniciar Sesión</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-6"></h1>
         <Login />
       </div>
     </div>
