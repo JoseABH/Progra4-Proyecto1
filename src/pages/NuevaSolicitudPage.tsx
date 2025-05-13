@@ -24,7 +24,6 @@ const NuevaSolicitudPage = () => {
         <FormularioPermiso
           onSuccess={() => {
             setMostrarFormulario(false); // Cierra el modal tras éxito
-            alert("Solicitud creada correctamente");
           }}
           onClose={cerrarFormulario} // Cierra el modal
         />
