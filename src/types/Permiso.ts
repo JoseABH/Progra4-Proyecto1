@@ -12,4 +12,6 @@ export type Permiso = {
   fechaFin: string;
   estadoGeneral: EstadoGeneral;
   estadoProceso: EstadoProceso;
+  comentarios?: string;
+  solicitadoEn?: string;
 };
