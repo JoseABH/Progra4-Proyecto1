@@ -3,7 +3,12 @@ import { useContext } from "react";
 import { AuthContext } from "../Context/AuthContext";
 import '../App.css';
 import { MdMapsHomeWork } from "react-icons/md";
-import { FaCalendarAlt,FaUserCog } from "react-icons/fa";
+
+import { FaCalendarAlt, FaUsers ,FaUserCog } from "react-icons/fa";
+
+
+
+
 import BotonNavBar from "./BotonNavBar";
 
 
@@ -37,6 +42,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                             <span>🌐</span>
                             <span className="hidden group-hover:inline">English</span>
                         </Link>
+                        <Link to="/GestionEmpleados" className="flex items-center gap-3 hover:text-gray-300">
+                             <FaUsers className="h-5 w-5" />
+                            <span className="hidden group-hover:inline">Gestion de Empleados</span>
+                        </Link>
+
 
                         <Link to="/solicitudes" className="flex items-center gap-3 hover:text-gray-300">
                             <span>🌐</span>
@@ -44,7 +54,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                         </Link>
                         <BotonNavBar path="/CrearSolicitudes" icono={<FaCalendarAlt />} nombre="Crear Solicitudes" ></BotonNavBar>
                         <BotonNavBar path="/GestionSolicitudes" icono={<FaCalendarAlt />} nombre="Gestion Solicitudes" ></BotonNavBar>
+
+                    
+                        <Link to="/User" className="flex items-center gap-3 hover:text-gray-300">
+                            <span>👥</span>
+                            <span className="hidden group-hover:inline">Gestion de Usarios</span>
+                        </Link>
+
                            <BotonNavBar path="/GestionUsers" icono={<FaUserCog />} nombre="Gestion Usuarios" ></BotonNavBar>
+
 
                     </nav>
 

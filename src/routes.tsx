@@ -1,5 +1,6 @@
 import RootLayout from "./components/RootLayout";
 import en from "./pages/en";
+import GestionEmpleadosPage from "./pages/GestionEmpleadosPage";
 import GestionPermisosPage from "./pages/GestionPermisosPage";
 import HomePage from "./pages/HomePage"
 import LoginPage from "./pages/LoginPage";
@@ -44,6 +45,12 @@ const solicitudesRoute = createRoute({
     component: SolicitudesPage,
 });
 
+const GestionEmpleadosRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/GestionEmpleados",
+    component: GestionEmpleadosPage,
+});
+
 const gestionSolicitudesRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/GestionSolicitudes",
@@ -67,7 +74,7 @@ rootRoute.addChildren([
     homeRoute,
     loginRoute,
     empleadosRoute,
-
+    GestionEmpleadosRoute,    
     solicitudesRoute,
     gestionSolicitudesRoute,
     crearSolicitudesRoute,
