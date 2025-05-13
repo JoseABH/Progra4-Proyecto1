@@ -17,7 +17,7 @@ export default function Login() {
     const handleLogin = () => {
 
         if (1 === 1) {
-            setUser("jose")
+            setUser("")
             navigate({ to: '/' })
 
         }

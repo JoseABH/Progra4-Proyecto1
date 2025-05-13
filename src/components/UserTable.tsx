@@ -1,20 +1,17 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { useReactTable, getCoreRowModel, ColumnDef,} from '@tanstack/react-table';
+import { useReactTable, getCoreRowModel, ColumnDef } from '@tanstack/react-table';
 import { FiEdit, FiTrash2, FiRefreshCw, FiPlus } from 'react-icons/fi';
-import { fetchUsers, createUser, updateUser, deleteUser } from '../services/UserSevice';
+import { fetchUsers, createUser, updateUser, deleteUser } from '../services/userSevice';
 import { User } from '../types/user';
 import UserForm from './UserForm';
 
-// Extend TableMeta to include custom properties
-declare module '@tanstack/react-table' {
-  interface TableMeta<TData> {
-    setEditingUser?: (user: User | null) => void;
-    setShowForm?: (show: boolean) => void;
-    handleDeleteUser?: (userId: number) => void;
-  }
-}
+// Extend User type to include onEdit and onDelete
+type TableUser = User & {
+  onEdit?: (user: User) => void;
+  onDelete?: (id: number) => void;
+};
 
-const columns: ColumnDef<User>[] = [
+const columns: ColumnDef<TableUser>[] = [
   { header: 'ID', accessorKey: 'id' },
   { header: 'Nombre', accessorKey: 'name' },
   { header: 'Email', accessorKey: 'email' },
@@ -26,28 +23,16 @@ const columns: ColumnDef<User>[] = [
   {
     header: 'Acciones',
     id: 'acciones',
-    cell: ({ row, table }) => (
+    cell: ({ row }) => (
       <div className="flex space-x-2">
         <button
-          onClick={() => {
-            const setEditingUser = table.options.meta?.setEditingUser;
-            const setShowForm = table.options.meta?.setShowForm;
-            if (setEditingUser && setShowForm) {
-              setEditingUser(row.original);
-              setShowForm(true);
-            }
-          }}
+          onClick={() => row.original.onEdit?.(row.original)}
           className="bg-blue-800 text-white px-3 py-1 rounded hover:bg-blue-700 transition text-sm flex items-center"
         >
           <FiEdit className="mr-1" /> Editar
         </button>
         <button
-          onClick={() => {
-            const handleDeleteUser = table.options.meta?.handleDeleteUser;
-            if (handleDeleteUser) {
-              handleDeleteUser(row.original.id);
-            }
-          }}
+          onClick={() => row.original.onDelete?.(row.original.id)}
           className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition text-sm flex items-center"
         >
           <FiTrash2 className="mr-1" /> Eliminar
@@ -59,16 +44,16 @@ const columns: ColumnDef<User>[] = [
 
 const StatusBadge = ({ type }: { type: User['role'] }) => {
   const styles = {
-    admin: 'bg-yellow-100 text-yellow-800',
-    user: 'bg-gray-100 text-gray-600',
-    moderator: 'bg-green-100 text-green-800',
+    'Usuario Comun': 'bg-gray-100 text-gray-600',
+    'Jefe de Departamento': 'bg-green-100 text-green-800',
+    'Jefe de RRHH': 'bg-yellow-100 text-yellow-800',
   };
 
-  const validType = styles[type] ? type : 'user';
+  const validType = styles[type] ? type : 'Usuario Comun';
 
   return (
     <span className={`text-xs px-2 py-1 rounded-full ${styles[validType]}`}>
-      {validType.charAt(0).toUpperCase() + validType.slice(1)}
+      {validType}
     </span>
   );
 };
@@ -132,19 +117,22 @@ const UserTable: React.FC = () => {
   }, []);
 
   const filteredData = useMemo(
-    () => users.filter((user) => user.name.toLowerCase().includes(filter.toLowerCase())),
-    [users, filter]
+    () =>
+      users.map((user) => ({
+        ...user,
+        onEdit: (u: User) => {
+          setEditingUser(u);
+          setShowForm(true);
+        },
+        onDelete: handleDeleteUser,
+      })),
+    [users]
   );
 
   const table = useReactTable({
     data: filteredData,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    meta: {
-      setEditingUser,
-      setShowForm,
-      handleDeleteUser,
-    },
   });
 
   return (
@@ -196,6 +184,11 @@ const UserTable: React.FC = () => {
                     <StatusBadge type={row.original.role} />
                   </div>
                   <p className="text-gray-700 text-sm">Email: {row.original.email}</p>
+                  {row.original.id_empleado && (
+                    <p className="text-gray-700 text-sm">
+                      Empleado asociado: {users.find(u => u.id === row.original.id_empleado)?.name || 'Desconocido'}
+                    </p>
+                  )}
                 </div>
                 <div className="flex space-x-2">
                   <button

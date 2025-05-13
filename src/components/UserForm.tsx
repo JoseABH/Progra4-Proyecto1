@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from '../types/user';
+import { fetchUsers } from '../services/userSevice';
 
 interface UserFormProps {
   user?: User;
@@ -12,8 +13,39 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
     name: user?.name || '',
     email: user?.email || '',
     password: user?.password || '',
-    role: user?.role || 'user',
+    role: user?.role || 'Usuario Comun',
+    id_empleado: user?.id_empleado?.toString() || '',
   });
+  const [employees, setEmployees] = useState<User[]>([]);
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
+
+  // Fetch users for the employee dropdown
+  useEffect(() => {
+    const loadEmployees = async () => {
+      setLoadingEmployees(true);
+      try {
+        const data = await fetchUsers();
+        setEmployees(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error loading employees:', error);
+        setEmployees([]);
+      } finally {
+        setLoadingEmployees(false);
+      }
+    };
+    loadEmployees();
+  }, []);
+
+  // Sync formData with user prop when it changes
+  useEffect(() => {
+    setFormData({
+      name: user?.name || '',
+      email: user?.email || '',
+      password: user?.password || '',
+      role: user?.role || 'Usuario Comun',
+      id_empleado: user?.id_empleado?.toString() || '',
+    });
+  }, [user]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -26,19 +58,37 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
     e.preventDefault();
     onSave({
       ...formData,
+      id_empleado: formData.id_empleado ? parseInt(formData.id_empleado) : undefined,
       ...(user ? { id: user.id } : {}),
     });
   };
 
   return (
-    <div className=" text-black fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+    <div className="User-form text-black fixed inset-0 bg-black bg-opacity-60 p-6 rounded-xl flex items-center justify-center z-50">
+      <div className="bg-white bg-opacity-100 p-6 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">
           {user ? 'Editar Usuario' : 'Agregar Usuario'}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Nombre“Nombre</label>
+            <label className="block text-sm font-medium text-gray-700">Empleado A asociar</label>
+            <select
+              name="id_empleado"
+              value={formData.id_empleado}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Seleccione un empleado</option>
+              {employees.map((employee) => (
+                <option key={employee.id} value={employee.id}>
+                  {employee.name}
+                </option>
+              ))}
+            </select>
+            {loadingEmployees && <p className="text-sm text-gray-500">Cargando empleados...</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Nombre</label>
             <input
               type="text"
               name="name"
@@ -78,9 +128,9 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="admin">Admin</option>
-              <option value="user">User</option>
-              <option value="moderator">Moderator</option>
+              <option value="Usuario Comun">Usuario Común</option>
+              <option value="Jefe de Departamento">Jefe de Departamento</option>
+              <option value="Jefe de RRHH">Jefe de RRHH</option>
             </select>
           </div>
           <div className="flex justify-end space-x-2">

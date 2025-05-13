@@ -3,5 +3,6 @@ export interface User {
   name: string;
   email: string;
   password: string;
-  role: 'admin' | 'user' | 'moderator'; // Restrict to known roles
+  role: 'Usuario Comun' | 'Jefe de Departamento' | 'Jefe de RRHH';
+  id_empleado?: number; 
 }
