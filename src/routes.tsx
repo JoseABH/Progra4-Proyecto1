@@ -1,5 +1,4 @@
 import RootLayout from "./components/RootLayout";
-import en from "./pages/en";
 import GestionEmpleadosPage from "./pages/GestionEmpleadosPage";
 import GestionPermisosPage from "./pages/GestionPermisosPage";
 import HomePage from "./pages/HomePage"
@@ -32,11 +31,6 @@ const loginRoute = createRoute({
     component: LoginPage,
 });
 
-const empleadosRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/en",
-    component: en,
-});
 
 
 const solicitudesRoute = createRoute({
@@ -73,7 +67,6 @@ const userRoute = createRoute({
 rootRoute.addChildren([
     homeRoute,
     loginRoute,
-    empleadosRoute,
     GestionEmpleadosRoute,    
     solicitudesRoute,
     gestionSolicitudesRoute,
