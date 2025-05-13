@@ -1,184 +1,124 @@
-import { useMemo, useState } from 'react';
-import {
-  useReactTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  flexRender,
-  ColumnDef,
-} from '@tanstack/react-table';
-import { HiOutlinePencil, HiOutlineTrash, HiOutlinePlus } from 'react-icons/hi';
+// src/components/TablaEmpleados.tsx
 
-type Empleado = {
-  id: number;
-  nombre: string;
-  cargo: string;
-  departamento: string;
-  estado: 'Activo' | 'Inactivo';
-  documento: string;
-  fechaContratacion: string;
-};
+import { useState } from 'react'
+import { MoreVertical, Pencil, Trash2 } from 'lucide-react'
+import { Employee } from '../types/employee'
 
-const datosEmpleados: Empleado[] = [
-  {
-    id: 1,
-    nombre: 'Juan Pérez',
-    cargo: 'Desarrollador Frontend',
-    departamento: 'Tecnología',
-    estado: 'Activo',
-    documento: '12345678A',
-    fechaContratacion: '14/01/2022',
-  },
-  {
-    id: 2,
-    nombre: 'María López',
-    cargo: 'Gerente de Proyecto',
-    departamento: 'Administración',
-    estado: 'Activo',
-    documento: '87654321B',
-    fechaContratacion: '09/06/2021',
-  },
-  {
-    id: 3,
-    nombre: 'Carlos Rodríguez',
-    cargo: 'Analista de Datos',
-    departamento: 'Tecnología',
-    estado: 'Inactivo',
-    documento: '23456789C',
-    fechaContratacion: '21/03/2023',
-  },
-];
+interface TablaEmpleadosProps {
+  data: Employee[]
+  onEdit?: (emp: Employee) => void
+  onDelete?: (id: number) => void
+}
 
-const TablaEmpleados = () => {
-  const [filtroNombre, setFiltroNombre] = useState('');
+export default function TablaEmpleados({ data, onEdit, onDelete }: TablaEmpleadosProps) {
+  const [openMenuId, setOpenMenuId]     = useState<number | null>(null)
+  const [currentPage, setCurrentPage]   = useState(1)
+  const itemsPerPage = 5
 
-  const columns = useMemo<ColumnDef<Empleado>[]>(
-    () => [
-      {
-        header: 'Nombre',
-        accessorKey: 'nombre',
-        cell: info => <span className="font-semibold">{info.getValue() as string}</span>,
-      },
-      {
-        header: 'Cargo',
-        accessorKey: 'cargo',
-        cell: info => info.getValue(),
-      },
-      {
-        header: 'Departamento',
-        accessorKey: 'departamento',
-        cell: info => info.getValue(),
-      },
-      {
-        header: 'Estado',
-        accessorKey: 'estado',
-        cell: ({ getValue }) => {
-          const estado = getValue() as string;
-          const color = estado === 'Activo' ? 'bg-green-500' : 'bg-red-500';
-          return (
-            <span className={`px-3 py-1 rounded-full text-white text-sm font-semibold ${color}`}>
-              {estado}
-            </span>
-          );
-        },
-      },
-      {
-        header: 'Documento',
-        accessorKey: 'documento',
-        cell: info => info.getValue(),
-      },
-      {
-        header: 'Fecha Contratación',
-        accessorKey: 'fechaContratacion',
-        cell: info => info.getValue(),
-      },
-      {
-        header: 'Acciones',
-        cell: () => (
-          <div className="flex items-center gap-4 text-black">
-            <button title="Editar">
-              <HiOutlinePencil className="w-5 h-5" />
-            </button>
-            <button title="Eliminar">
-              <HiOutlineTrash className="w-5 h-5" />
-            </button>
-          </div>
-        ),
-      },
-    ],
-    []
-  );
+  // Cálculo de paginación
+  const pageCount = Math.ceil(data.length / itemsPerPage)
+  const startIdx  = (currentPage - 1) * itemsPerPage
+  const paginatedData = data.slice(startIdx, startIdx + itemsPerPage)
 
-  const empleadosFiltrados = datosEmpleados.filter((empleado) =>
-    empleado.nombre.toLowerCase().includes(filtroNombre.toLowerCase())
-  );
-
-  const table = useReactTable({
-    data: empleadosFiltrados,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-  });
+  const toggleMenu = (id: number) =>
+    setOpenMenuId(openMenuId === id ? null : id)
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl font-bold mb-6">Sistema de Gestión de Empleados</h2>
+    <div className="overflow-x-auto bg-white border border-gray-200 rounded-lg">
+      <table className="min-w-full text-left">
+        <thead className="border-b border-gray-200 bg-white">
+          <tr>
+            <th className="px-6 py-3 text-sm font-medium text-gray-700">Nombre</th>
+            <th className="px-6 py-3 text-sm font-medium text-gray-700">Correo Electrónico</th>
+            <th className="px-6 py-3 text-sm font-medium text-gray-700">Departamento</th>
+            <th className="px-6 py-3 text-sm font-medium text-gray-700">Cargo</th>
+            <th className="px-6 py-3 text-sm font-medium text-gray-700">Estado</th>
+            <th className="px-6 py-3 text-center text-sm font-medium text-gray-700">Acciones</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200">
+          {paginatedData.map(emp => (
+            <tr key={emp.id} className="hover:bg-gray-50">
+              <td className="px-6 py-4 text-sm text-gray-800">{emp.nombre}</td>
+              <td className="px-6 py-4 text-sm text-gray-800">{emp.correo}</td>
+              <td className="px-6 py-4 text-sm text-gray-800">{emp.departamento}</td>
+              <td className="px-6 py-4 text-sm text-gray-800">{emp.cargo}</td>
+              <td className="px-6 py-4 text-sm">
+                <span
+                  className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                    emp.estado === 'Activo'
+                      ? 'bg-green-100 text-green-800'
+                      : emp.estado === 'Ausente'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}
+                >
+                  {emp.estado}
+                </span>
+              </td>
+              <td className="px-6 py-4 text-center text-sm text-gray-500 relative">
+                <button
+                  onClick={() => toggleMenu(emp.id)}
+                  className="p-1 hover:text-gray-700 hover:bg-gray-100 rounded-full transition"
+                >
+                  <MoreVertical />
+                  <span className="sr-only">Abrir acciones</span>
+                </button>
+                {openMenuId === emp.id && (
+                  <div
+                    className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-20"
+                    onMouseLeave={() => setOpenMenuId(null)}
+                  >
+                    <div
+                      onClick={() => { setOpenMenuId(null); onEdit?.(emp) }}
+                      className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <Pencil className="mr-2 h-4 w-4" /> Editar
+                    </div>
+                    <div
+                      onClick={() => { setOpenMenuId(null); onDelete?.(emp.id) }}
+                      className="flex items-center px-3 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> Eliminar
+                    </div>
+                  </div>
+                )}
+              </td>
+            </tr>
+          ))}
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-4">
-          <button className="px-4 py-2 bg-gray-100 text-sm font-semibold rounded-md border border-gray-300">
-            Gestión de Empleados
+          {data.length === 0 && (
+            <tr>
+              <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
+                No se encontraron empleados.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      {/* Paginación */}
+      {pageCount > 1 && (
+        <div className="flex justify-between items-center px-6 py-4 bg-gray-50">
+          <button
+            onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1 bg-white border rounded disabled:opacity-50"
+          >
+            Anterior
           </button>
-          <button className="px-4 py-2 text-sm text-gray-500 font-medium rounded-md hover:bg-gray-100 transition">
-            Reportes
+          <span className="text-sm text-gray-700">
+            Página {currentPage} de {pageCount}
+          </span>
+          <button
+            onClick={() => setCurrentPage(p => Math.min(p + 1, pageCount))}
+            disabled={currentPage === pageCount}
+            className="px-3 py-1 bg-white border rounded disabled:opacity-50"
+          >
+            Siguiente
           </button>
         </div>
-
-        {/* Filtro y botón */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-          <input
-            type="text"
-            placeholder="🔍 Buscar empleados..."
-            value={filtroNombre}
-            onChange={(e) => setFiltroNombre(e.target.value)}
-            className="border border-gray-300 px-4 py-2 rounded-md w-full sm:w-1/2"
-          />
-          <button className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-md hover:bg-gray-900">
-            <HiOutlinePlus className="w-5 h-5" />
-            Añadir Empleado
-          </button>
-        </div>
-
-        {/* Tabla */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white text-sm">
-            <thead className="bg-gray-100 text-gray-600 font-medium">
-              {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <th key={header.id} className="px-4 py-3 text-left">
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="hover:bg-gray-50">
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="px-4 py-3">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      )}
     </div>
-  );
-};
-
-export default TablaEmpleados;
+  )
+}
