@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types/user';
-import { fetchUsers } from '../services/userSevice';
+import { Employee } from '../types/employee';
+import { getEmpleados } from '../services/GestionEmpleadosService';
 
 interface UserFormProps {
   user?: User;
@@ -16,16 +17,16 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
     role: user?.role || 'Usuario Comun',
     id_empleado: user?.id_empleado?.toString() || '',
   });
-  const [employees, setEmployees] = useState<User[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
 
-  // Fetch users for the employee dropdown
+  // Fetch employees for the dropdown
   useEffect(() => {
     const loadEmployees = async () => {
       setLoadingEmployees(true);
       try {
-        const data = await fetchUsers();
-        setEmployees(Array.isArray(data) ? data : []);
+        const data = await getEmpleados();
+        setEmployees(data);
       } catch (error) {
         console.error('Error loading employees:', error);
         setEmployees([]);
@@ -36,7 +37,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
     loadEmployees();
   }, []);
 
-  // Sync formData with user prop when it changes
+  // Sync formData with user prop when editing
   useEffect(() => {
     setFormData({
       name: user?.name || '',
@@ -46,6 +47,22 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
       id_empleado: user?.id_empleado?.toString() || '',
     });
   }, [user]);
+
+  // Update name and email when id_empleado changes
+  useEffect(() => {
+    if (formData.id_empleado) {
+      const selectedEmployee = employees.find(
+        (emp) => emp.id === parseInt(formData.id_empleado)
+      );
+      if (selectedEmployee) {
+        setFormData((prev) => ({
+          ...prev,
+          name: selectedEmployee.nombre,
+          email: selectedEmployee.correo,
+        }));
+      }
+    }
+  }, [formData.id_empleado, employees]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -64,7 +81,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
   };
 
   return (
-    <div className="User-form text-black fixed inset-0 bg-black bg-opacity-60 p-6 rounded-xl flex items-center justify-center z-50">
+    <div className="User-form text-black fixed inset-0 bg-opacity-60 p-6 rounded-xl flex items-center justify-center z-50">
       <div className="bg-white bg-opacity-100 p-6 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">
           {user ? 'Editar Usuario' : 'Agregar Usuario'}
@@ -81,7 +98,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
               <option value="">Seleccione un empleado</option>
               {employees.map((employee) => (
                 <option key={employee.id} value={employee.id}>
-                  {employee.name}
+                  {employee.nombre}
                 </option>
               ))}
             </select>
