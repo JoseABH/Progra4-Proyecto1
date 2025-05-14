@@ -1,5 +1,4 @@
 import RootLayout from "./components/RootLayout";
-import { UserDashboard } from "./components/UserDashboard";
 import GestionEmpleadosPage from "./pages/GestionEmpleadosPage";
 import GestionPermisosPage from "./pages/GestionPermisosPage";
 import HomePage from "./pages/HomePage"
@@ -17,7 +16,7 @@ const rootRoute = createRootRoute({
 const homeRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/",
-    component: UserDashboard,
+    component: HomePage,
 });
 
 const loginRoute = createRoute({

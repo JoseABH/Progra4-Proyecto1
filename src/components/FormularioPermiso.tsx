@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState,useContext } from "react";
 import { Permiso } from "../types/Permiso";
 import { usePermisos } from "../hooks/usePermisos";
-
+import { AuthContext } from '../Context/AuthContext';
 const FormularioPermiso = ({ onSuccess, onClose }: { onSuccess?: () => void, onClose?: () => void }) => {
   const { addPermiso } = usePermisos();
+    const { user } = useContext(AuthContext)!;
   const [formData, setFormData] = useState<Omit<Permiso, "id">>({
-    empleado: "",
+    empleado: user.name ,
     motivo: "",
     tipo: "Permiso personal",
     fechaInicio: "",
@@ -41,6 +42,7 @@ const FormularioPermiso = ({ onSuccess, onClose }: { onSuccess?: () => void, onC
                 placeholder="Nombre del empleado"
                 value={formData.empleado}
                 onChange={handleChange}
+                disabled={true}
                 required
                 className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -67,6 +69,7 @@ const FormularioPermiso = ({ onSuccess, onClose }: { onSuccess?: () => void, onC
               >
                 <option value="Personal">Permiso personal</option>
                 <option value="Vacaciones">Vacaciones</option>
+                <option value="Asuntos medicos">Asuntos Médicos</option>
               </select>
             </div>
             <div>
