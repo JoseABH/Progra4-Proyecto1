@@ -1,17 +1,11 @@
 import RootLayout from "./components/RootLayout";
-import en from "./pages/en";
+import GestionEmpleadosPage from "./pages/GestionEmpleadosPage";
 import GestionPermisosPage from "./pages/GestionPermisosPage";
 import HomePage from "./pages/HomePage"
 import LoginPage from "./pages/LoginPage";
 import NuevaSolicitudPage from "./pages/NuevaSolicitudPage";
-
 import SolicitudesPage from "./pages/SolicitudPage"
-
 import UserPage from "./pages/UserPage";
-
-
-
-
 import { createRootRoute, createRoute, createRouter, createBrowserHistory } from "@tanstack/react-router";
 
 
@@ -31,17 +25,16 @@ const loginRoute = createRoute({
     component: LoginPage,
 });
 
-const empleadosRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/en",
-    component: en,
-});
-
-
 const solicitudesRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/solicitudes",
     component: SolicitudesPage,
+});
+
+const GestionEmpleadosRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/GestionEmpleados",
+    component: GestionEmpleadosPage,
 });
 
 const gestionSolicitudesRoute = createRoute({
@@ -66,12 +59,11 @@ const userRoute = createRoute({
 rootRoute.addChildren([
     homeRoute,
     loginRoute,
-    empleadosRoute,
-
+    GestionEmpleadosRoute,    
     solicitudesRoute,
     gestionSolicitudesRoute,
     crearSolicitudesRoute,
-
+   
     userRoute
 
 ])

@@ -6,3 +6,4 @@ export interface User {
   role: 'Usuario Comun' | 'Jefe de Departamento' | 'Jefe de RRHH';
   id_empleado?: number; 
 }
+
