@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useContext } from 'react';
 import { AuthContext } from '../Context/AuthContext';
-import { fetchUsers } from '../services/userSevice'; // Fixed typo
+import { fetchUsers } from '../services/userSevice';
 import { User } from '../types/user';
 import { FiMail, FiLock, FiLoader } from 'react-icons/fi';
 
@@ -21,7 +21,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  // Check localStorage for saved user on mount
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
@@ -31,7 +30,7 @@ export default function Login() {
         navigate({ to: '/' });
       } catch (err) {
         console.error('Error parsing saved user:', err);
-        localStorage.removeItem('user'); // Clear invalid data
+        localStorage.removeItem('user');
       }
     }
   }, [setUser, navigate]);
@@ -74,40 +73,40 @@ export default function Login() {
   };
 
   return (
-    <div className="">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 animate-fade-in">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-sm p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Iniciar Sesión</h1>
-          <p className="text-gray-500 mt-2">Accede a tu cuenta para continuar</p>
+          <h1 className="text-2xl font-semibold text-gray-900">Iniciar Sesión</h1>
+          <p className="text-gray-600 mt-2 text-sm">Acceda a su cuenta con sus credenciales</p>
         </div>
         <form className="space-y-6">
-          <div className="relative">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Correo Electrónico
             </label>
-            <div className="relative">
+            <div className="mt-1 relative">
               <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 id="email"
                 type="email"
-                placeholder="Ingresa tu correo"
+                placeholder="Correo electrónico"
                 ref={emailRef}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-gray-50 text-gray-900 placeholder-gray-400"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 text-gray-900 placeholder-gray-400 text-sm"
               />
             </div>
           </div>
-          <div className="relative">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Contraseña
             </label>
-            <div className="relative">
+            <div className="mt-1 relative">
               <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 id="password"
                 type="password"
-                placeholder="Ingresa tu contraseña"
+                placeholder="Contraseña"
                 ref={passwordRef}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-gray-50 text-gray-900 placeholder-gray-400"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 text-gray-900 placeholder-gray-400 text-sm"
               />
             </div>
           </div>
@@ -119,27 +118,27 @@ export default function Login() {
               onChange={(e) => setRememberMe(e.target.checked)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-            <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
-              Recordar sesión
+            <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-600">
+              Mantener sesión iniciada
             </label>
           </div>
           <button
             type="button"
             onClick={handleLogin}
             disabled={loading}
-            className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg shadow-md hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 flex items-center justify-center"
+            className="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center text-sm"
           >
             {loading ? (
               <>
                 <FiLoader className="animate-spin mr-2" />
-                Cargando...
+                Iniciando...
               </>
             ) : (
-              'Ingresar'
+              'Iniciar Sesión'
             )}
           </button>
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md text-sm text-red-700">
+            <div className="bg-red-50 border border-red-200 p-3 rounded-md text-sm text-red-600">
               {error}
             </div>
           )}
