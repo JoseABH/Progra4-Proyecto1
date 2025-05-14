@@ -15,21 +15,28 @@ const writeHeaders = {
   'Content-Type': 'application/json',
 };
 
+
+
 /** GET /latest → Employee[] */
 export async function getEmpleados(): Promise<Employee[]> {
   const res = await fetch(`${BASE_URL}/latest`, {
-    method:  'GET',
+    method:  "GET",
     headers: readHeaders,
   });
   if (!res.ok) throw new Error(`getEmpleados: ${res.status}`);
-  
   const json = await res.json();
-  // JSONBin v3 puede devolver json.record === Employee[] o json.record === { record: Employee[] }
   const data = Array.isArray(json.record)
     ? json.record
     : json.record.record;
-
   return data as Employee[];
+}
+
+/** GET por ID → Employee */
+export async function getEmpleadoById(id: number): Promise<Employee> {
+  const emps = await getEmpleados();
+  const emp  = emps.find(e => e.id === id);
+  if (!emp) throw new Error(`Empleado con id ${id} no encontrado`);
+  return emp;
 }
 
 /** PUT (sobrescribe) → no return */
