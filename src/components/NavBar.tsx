@@ -46,6 +46,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 <BotonNavBar path="/solicitudes" icono={<FaCalendarWeek />} nombre="Gestion de solicitudes" />
                 <BotonNavBar path="/GestionSolicitudes" icono={<FaCalendarAlt />} nombre="Vista de Solicitudes" />
                 <BotonNavBar path="/GestionUsers" icono={<FaUserCog />} nombre="Gestion Usuarios" />
+               
               </>
             ) : user.role === "Jefe de Departamento" ? (
               <>
