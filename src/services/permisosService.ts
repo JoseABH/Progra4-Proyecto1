@@ -19,4 +19,10 @@ export const permisoService = {
   async updateAll(data: Permiso[]) {
     return axios.put(BASE_URL, data, { headers });
   },
+
+  /** Nuevo método: obtiene solo los permisos con el estadoProceso especificado */
+  async getByEstadoProceso(estado: string): Promise<Permiso[]> {
+    const todos = await this.getAll();
+    return todos.filter((permiso) => permiso.estadoProceso === estado);
+  },
 };

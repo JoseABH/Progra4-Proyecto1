@@ -7,56 +7,62 @@ import {
   FaCalendarAlt,
   FaUserCircle,
 } from 'react-icons/fa';
-import { FiChevronRight } from 'react-icons/fi';
 
-import { AuthContext }    from '../Context/AuthContext';
-import { permisoService } from '../services/permisosService';
-import { Permiso }        from '../types/Permiso';
+import { AuthContext } from '../Context/AuthContext';
+import { getEmpleadoById } from '../services/GestionEmpleadosService';
+import { Employee } from '../types/employee';
 
 export const UserDashboard = () => {
   const { user } = useContext(AuthContext)!;
 
-  const [tab, setTab]                 = useState<'perfil'|'solicitudes'>('perfil');
-  const [solicitudes, setSolicitudes] = useState<Permiso[]>([]);
-  const [loading, setLoading]         = useState(true);
-  const [error, setError]             = useState<string|null>(null);
+  const [empleado, setEmpleado] = useState<Employee | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const all = await permisoService.getAll();
-        setSolicitudes(all.filter(p => p.empleado === user.name));
+        const emp = await getEmpleadoById(user.id_empleado);
+        setEmpleado(emp);
       } catch {
-        setError('Error cargando permisos');
+        setError('Error cargando datos del empleado');
       } finally {
         setLoading(false);
       }
     })();
-  }, [user.name]);
+  }, [user.id_empleado]);
 
-  if (loading) return <div className="p-8">Cargando datos…</div>;
-  if (error)   return <div className="p-8 text-red-600">{error}</div>;
+  if (loading) return <div className="p-8"><div className="p-6 flex  justify-center items-center h-screen">
+    <div className="flex items-center justify-center h-screen">
+      <div className="w-80 p-5 rounded-xl shadow-lg bg-white animate-pulse space-y-3">
+        <div className="h-6 w-2/3 bg-slate-300 rounded" />
+        <div className="h-4 w-full bg-slate-300 rounded" />
+        <div className="h-4 w-5/6 bg-slate-300 rounded" />
+        <div className="h-4 w-4/6 bg-slate-300 rounded" />
+        <div className="h-4 w-2/3 bg-slate-300 rounded" />
+        <p>Cargando datos...</p>
+      </div>
 
-  const pendingCount = solicitudes.filter(s => s.estadoGeneral === 'Pendiente').length;
-  const activeCount  = user.activeProjects ?? 0;
-  const pctPend      = solicitudes.length ? (pendingCount/solicitudes.length)*100 : 0;
- 
+    </div>
 
-  // Iniciales para el avatar
-  const initials = user.name
+  </div></div>;
+  if (error) return <div className="p-8 text-red-600">{error}</div>;
+  if (!empleado) return <div className="p-8">Empleado no encontrado.</div>;
+
+  const initials = empleado.nombre
     .split(' ')
     .map((n: string) => n[0])
-    .slice(0,2)
+    .slice(0, 2)
     .join('');
-
+  const randomColor = `hsl(${Math.floor(Math.random() * 360)}, 70%, 80%)`;
   return (
     <div className="p-8 min-h-screen bg-gray-50">
       {/* Header */}
       <div className="space-y-1 mb-6">
-        <h1 className="text-4xl font-bold">
-          Bienvenido, {user.name} <FaUserCircle className="inline text-2xl" />
+        <h1 className="text-4xl font-bold flex items-center">
+          Bienvenido, {empleado.nombre}
         </h1>
-        <p className="text-gray-600">Gestione su información y solicitudes.</p>
+        <p className="text-gray-600">Gestione su información personal.</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -64,17 +70,17 @@ export const UserDashboard = () => {
         <div className="flex-1 relative">
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
             <span className="absolute top-6 right-6 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs">
-              {user.status}
+              {empleado.estado}
             </span>
             <h2 className="text-lg font-semibold mb-4">Información Personal</h2>
 
             <div className="flex items-center space-x-4 mb-6">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-xl text-gray-500">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-xl text-gray-500" style={{ backgroundColor: randomColor }}>
                 {initials}
               </div>
               <div>
-                <h3 className="text-xl font-bold">{user.name}</h3>
-                <p className="text-gray-500">{user.cargo}</p>
+                <h3 className="text-xl font-bold">{empleado.nombre}</h3>
+                <p className="text-gray-500">{empleado.cargo}</p>
               </div>
             </div>
 
@@ -84,7 +90,7 @@ export const UserDashboard = () => {
                 <FaEnvelope className="text-gray-400 w-5 h-5" />
                 <div className="ml-3">
                   <p className="text-xs text-gray-500">Correo electrónico</p>
-                  <p className="text-gray-700">{user.email}</p>
+                  <p className="text-gray-700">{empleado.correo}</p>
                 </div>
               </div>
 
@@ -93,7 +99,7 @@ export const UserDashboard = () => {
                 <FaBuilding className="text-gray-400 w-5 h-5" />
                 <div className="ml-3">
                   <p className="text-xs text-gray-500">Departamento</p>
-                  <p className="text-gray-700">{user.departamento}</p>
+                  <p className="text-gray-700">{empleado.departamento}</p>
                 </div>
               </div>
 
@@ -102,7 +108,7 @@ export const UserDashboard = () => {
                 <FaBriefcase className="text-gray-400 w-5 h-5" />
                 <div className="ml-3">
                   <p className="text-xs text-gray-500">Cargo</p>
-                  <p className="text-gray-700">{user.cargo}</p>
+                  <p className="text-gray-700">{empleado.cargo}</p>
                 </div>
               </div>
 
@@ -110,44 +116,19 @@ export const UserDashboard = () => {
               <div className="flex items-center border border-gray-200 rounded-lg p-4">
                 <FaCalendarAlt className="text-gray-400 w-5 h-5" />
                 <div className="ml-3">
-                  <p className="text-xs text-gray-500">Fecha de ingreso</p>
-                  <p className="text-gray-700">{user.fechaIngreso}</p>
+                  <p className="text-xs text-gray-500">ID</p>
+                  <p className="text-gray-700">{empleado.id}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ACCIONES RÁPIDAS + RESUMEN */}
-        <div className="w-full lg:w-80 flex flex-col gap-6">
-          
-          
-
-          {/* Resumen */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-lg font-semibold mb-4">Resumen</h3>
-            <div className="space-y-4">
-              {/* Pendientes */}
-              <div>
-                <div className="flex justify-between items-center text-sm text-gray-600 mb-1">
-                  <span>Solicitudes pendientes</span>
-                  <span className="bg-black text-white text-xs px-2 py-0.5 rounded-full">
-                    {pendingCount}
-                  </span>
-                </div>
-                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-black" style={{ width: `${pctPend}%` }} />
-                </div>
-              </div>
-            
-                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                 
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Espacio para futuros paneles */}
+        <div className="w-full lg:w-80">
+          {/* Puedes agregar aquí acciones o estadísticas si las necesitas más adelante */}
         </div>
       </div>
-    
+    </div>
   );
 };

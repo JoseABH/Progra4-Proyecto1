@@ -3,8 +3,7 @@ import { usePermisos } from "../hooks/usePermisos";
 
 const pasosProceso: EstadoProceso[] = [
   "Jefe de Departamento",
-  "Recursos Humanos",
-  "Dirección",
+  "Jefe de RRHH",
 ];
 
 export default function ModalRevision({
