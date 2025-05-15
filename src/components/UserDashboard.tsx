@@ -5,8 +5,8 @@ import {
   FaBuilding,
   FaBriefcase,
   FaRegIdCard,
-
 } from 'react-icons/fa';
+
 import { EstadisticasSolicitudes } from "./EstadisticasSolicitudes";
 import { EstadisticasEmpleados } from "../components/EstadisticasEmpleados";
 import { AuthContext } from '../Context/AuthContext';
