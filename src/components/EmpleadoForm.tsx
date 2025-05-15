@@ -111,18 +111,21 @@ export default function EmpleadoForm({
             )}
           </form.Field>
 
-          <form.Field name="cargo">
+            <form.Field name="cargo">
             {field => (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Cargo</label>
-                <input
-                  type="text"
+                <select
                   value={field.state.value as string}
                   onBlur={field.handleBlur}
                   onChange={e => field.handleChange(e.target.value as any)}
                   className="w-full border-gray-300 border px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   required
-                />
+                >
+                  <option value="Usuario Comun">Usuario Común</option>
+                  <option value="Jefe de Departamento">Jefe de Departamento</option>
+                  <option value="Jefe de RRHH">Jefe de RRHH</option>
+                </select>
               </div>
             )}
           </form.Field>
