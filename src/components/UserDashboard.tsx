@@ -5,7 +5,7 @@ import {
   FaBuilding,
   FaBriefcase,
   FaCalendarAlt,
-  FaUserCircle,
+
 } from 'react-icons/fa';
 
 import { AuthContext } from '../Context/AuthContext';
