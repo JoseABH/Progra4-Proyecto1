@@ -5,14 +5,16 @@ import { AuthContext } from '../Context/AuthContext';
 const FormularioPermiso = ({ onSuccess, onClose }: { onSuccess?: () => void, onClose?: () => void }) => {
   const { addPermiso } = usePermisos();
     const { user } = useContext(AuthContext)!;
-  const [formData, setFormData] = useState<Omit<Permiso, "id">>({
+   const proceso = user.role === "Jefe de Departamento" ? "Jefe de RRHH" : "Jefe de Departamento";
+  
+    const [formData, setFormData] = useState<Omit<Permiso, "id">>({
     empleado: user.name ,
     motivo: "",
     tipo: "Permiso personal",
     fechaInicio: "",
     fechaFin: "",
     estadoGeneral: "Pendiente",
-    estadoProceso: "Jefe de Departamento",
+    estadoProceso: proceso ,
   });
 
   const handleChange = (
