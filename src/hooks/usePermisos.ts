@@ -19,7 +19,7 @@ export function usePermisos() {
       solicitadoEn: new Date().toISOString(),
       ...nuevo,
     };
-    const nuevos = [...permisos, nuevoConId];
+    const nuevos = [nuevoConId,...permisos];
     setPermisos(nuevos);
     permisoService.updateAll(nuevos);
   };
