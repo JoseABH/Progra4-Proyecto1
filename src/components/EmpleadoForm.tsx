@@ -1,7 +1,7 @@
 // src/components/EmpleadoForm.tsx
-import React, { useState, useEffect } from 'react'
-
-import { FiX }      from 'react-icons/fi'
+import { useEffect } from 'react'
+import { useForm } from '@tanstack/react-form'
+import { FiX } from 'react-icons/fi'
 import { Employee } from '../types/employee'
 
 interface EmpleadoFormProps {
@@ -14,44 +14,40 @@ interface EmpleadoFormProps {
 const departamentos = ['Engineering','Marketing','Human Resources','Finance','Sales'] as const
 const estados       = ['Activo','Ausente','Terminado']               as const
 
+// Valores iniciales vacíos tipados como Omit<Employee,'id'>
+const emptyValues: Omit<Employee,'id'> = {
+  nombre: '',
+  correo: '',
+  departamento: 'Engineering',
+  cargo: '',
+  estado: 'Activo',
+}
+
 export default function EmpleadoForm({
-  isOpen, onClose, empleadoForm, initialData
+  isOpen,
+  onClose,
+  empleadoForm,
+  initialData,
 }: EmpleadoFormProps) {
   const isEdit = Boolean(initialData)
-  const [form, setForm] = useState<Omit<Employee,'id'>>({
-    nombre      : '',
-    correo      : '',
-    departamento: 'Engineering',
-    cargo       : '',
-    estado      : 'Activo',
+
+  // Combina initialData con emptyValues garantizando el tipo
+  const initialValues = initialData ?? emptyValues
+
+  const form = useForm({
+    defaultValues: initialValues as Omit<Employee,'id'>,
+    onSubmit: ({ value }) => {
+      const payload = isEdit
+        ? { ...(initialData as Employee), ...value }
+        : value
+      empleadoForm(payload)
+      onClose()
+    },
   })
 
   useEffect(() => {
-    if (initialData) {
-      const { id, ...rest } = initialData
-      setForm(rest)
-    } else {
-      setForm({
-        nombre      : '',
-        correo      : '',
-        departamento: 'Engineering',
-        cargo       : '',
-        estado      : 'Activo',
-      })
-    }
+    form.reset(initialValues as Omit<Employee,'id'>)
   }, [initialData, isOpen])
-
-  const handleChange = (f: keyof typeof form, v: string) =>
-    setForm(prev => ({ ...prev, [f]: v }))
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    empleadoForm(isEdit
-      ? ({ ...(initialData as Employee), ...form })
-      : form
-    )
-    onClose()
-  }
 
   if (!isOpen) return null
 
@@ -66,62 +62,89 @@ export default function EmpleadoForm({
             <FiX size={24} />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="px-8 py-6 space-y-6">
-          {/* Nombre */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-            <input
-              type="text"
-              value={form.nombre}
-              onChange={e => handleChange('nombre', e.target.value)}
-              className="w-full border-gray-300 border px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500"
-              required
-            />
-          </div>
-          {/* Correo */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
-            <input
-              type="email"
-              value={form.correo}
-              onChange={e => handleChange('correo', e.target.value)}
-              className="w-full border-gray-300 border px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500"
-              required
-            />
-          </div>
-          {/* Departamento */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
-            <select
-              value={form.departamento}
-              onChange={e => handleChange('departamento', e.target.value)}
-              className="w-full border-gray-300 border px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500"
-            >
-              {departamentos.map(dep => <option key={dep} value={dep}>{dep}</option>)}
-            </select>
-          </div>
-          {/* Cargo */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Cargo</label>
-            <input
-              type="text"
-              value={form.cargo}
-              onChange={e => handleChange('cargo', e.target.value)}
-              className="w-full border-gray-300 border px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500"
-              required
-            />
-          </div>
-          {/* Estado */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-            <select
-              value={form.estado}
-              onChange={e => handleChange('estado', e.target.value)}
-              className="w-full border-gray-300 border px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500"
-            >
-              {estados.map(est => <option key={est} value={est}>{est}</option>)}
-            </select>
-          </div>
+        <form onSubmit={form.handleSubmit} className="px-8 py-6 space-y-6">
+          <form.Field name="nombre">
+            {field => (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                <input
+                  type="text"
+                  value={field.state.value as string}
+                  onBlur={field.handleBlur}
+                  onChange={e => field.handleChange(e.target.value as any)}
+                  className="w-full border-gray-300 border px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+            )}
+          </form.Field>
+
+          <form.Field name="correo">
+            {field => (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+                <input
+                  type="email"
+                  value={field.state.value as string}
+                  onBlur={field.handleBlur}
+                  onChange={e => field.handleChange(e.target.value as any)}
+                  className="w-full border-gray-300 border px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+            )}
+          </form.Field>
+
+          <form.Field name="departamento">
+            {field => (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                <select
+                  value={field.state.value as string}
+                  onBlur={field.handleBlur}
+                  onChange={e => field.handleChange(e.target.value as any)}
+                  className="w-full border-gray-300 border px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                >
+                  {departamentos.map(dep => <option key={dep} value={dep}>{dep}</option>)}
+                </select>
+              </div>
+            )}
+          </form.Field>
+
+            <form.Field name="cargo">
+            {field => (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cargo</label>
+                <select
+                  value={field.state.value as string}
+                  onBlur={field.handleBlur}
+                  onChange={e => field.handleChange(e.target.value as any)}
+                  className="w-full border-gray-300 border px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  required
+                >
+                  <option value="Usuario Comun">Usuario Común</option>
+                  <option value="Jefe de Departamento">Jefe de Departamento</option>
+                  <option value="Jefe de RRHH">Jefe de RRHH</option>
+                </select>
+              </div>
+            )}
+          </form.Field>
+
+          <form.Field name="estado">
+            {field => (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                <select
+                  value={field.state.value as string}
+                  onBlur={field.handleBlur}
+                  onChange={e => field.handleChange(e.target.value as any)}
+                  className="w-full border-gray-300 border px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                >
+                  {estados.map(est => <option key={est} value={est}>{est}</option>)}
+                </select>
+              </div>
+            )}
+          </form.Field>
 
           <div className="flex justify-end space-x-3 mt-4">
             <button

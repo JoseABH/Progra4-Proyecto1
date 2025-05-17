@@ -15,3 +15,4 @@ export type Permiso = {
   comentarios?: string;
   solicitadoEn?: string;
 };
+
