@@ -1,100 +1,206 @@
-import { useState,useContext } from "react";
+import { useContext } from "react";
+import { useForm } from "@tanstack/react-form";
 import { Permiso } from "../types/Permiso";
 import { usePermisos } from "../hooks/usePermisos";
-import { AuthContext } from '../Context/AuthContext';
-const FormularioPermiso = ({ onSuccess, onClose }: { onSuccess?: () => void, onClose?: () => void }) => {
+import { AuthContext } from "../Context/AuthContext";
+
+const FormularioPermiso = ({ onSuccess, onClose }: { onSuccess?: () => void; onClose?: () => void }) => {
   const { addPermiso } = usePermisos();
-    const { user } = useContext(AuthContext)!;
-   const proceso = user.role === "Jefe de Departamento" ? "Jefe de RRHH" : "Jefe de Departamento";
+  const { user } = useContext(AuthContext)!;
   
-    const [formData, setFormData] = useState<Omit<Permiso, "id">>({
-    empleado: user.name ,
-    motivo: "",
-    tipo: "Permiso personal",
-    fechaInicio: "",
-    fechaFin: "",
-    estadoGeneral: "Pendiente",
-    estadoProceso: proceso ,
+
+
+const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.role === "Jefe de Departamento" ? "Jefe de RRHH": "Jefe de RRHH";
+
+  const form = useForm<Omit<Permiso, "id">, any, any, any, any, any, any, any, any, any>({
+    defaultValues: {
+      empleado: user.name,
+      motivo: "",
+      tipo: "Permiso personal" as const,
+      fechaInicio: "",
+      fechaFin: "",
+      estadoGeneral: "Pendiente",
+      estadoProceso: proceso,
+    },
+    onSubmit: async ({ value }) => {
+      await addPermiso(value);
+      onSuccess?.();
+      alert("Permiso creado correctamente");
+      onClose?.();
+    },
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await addPermiso(formData);
-    onSuccess?.(); // Callback para informar que la acción se completó
-    alert("Permiso creado correctamente");
-    onClose?.(); // Llama a la función para cerrar el modal
-  };
 
   return (
-    <div className="crearSolicitudP fixed inset-0 flex items-center justify-center z-50 ">
+    <div className="crearSolicitudP fixed inset-0 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl">
         <h2 className="text-xl font-bold mb-4 text-center">Crear Solicitud de Permiso</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            form.handleSubmit();
+          }}
+          className="space-y-4"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="empleado" className="block text-sm font-medium mb-1">Empleado</label>
-              <input
+              <label htmlFor="empleado" className="block text-sm font-medium mb-1">
+                Empleado
+              </label>
+              <form.Field
                 name="empleado"
-                placeholder="Nombre del empleado"
-                value={formData.empleado}
-                onChange={handleChange}
-                disabled={true}
-                required
-                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="motivo" className="block text-sm font-medium mb-1">Motivo</label>
-              <textarea
-                name="motivo"
-                placeholder="Motivo del permiso"
-                value={formData.motivo}
-                onChange={handleChange}
-                required
-                rows={4}
-                className="w-full border border-gray-300 px-4 py-2 rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="tipo" className="block text-sm font-medium mb-1">Tipo de Permiso</label>
-              <select
-                name="tipo"
-                value={formData.tipo}
-                onChange={handleChange}
-                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                validators={{
+                  onChange: ({ value }) => (!value ? "El empleado es requerido" : undefined),
+                }}
               >
-                <option value="Personal">Permiso personal</option>
-                <option value="Vacaciones">Vacaciones</option>
-                <option value="Asuntos medicos">Asuntos Médicos</option>
-              </select>
+                {({ state, handleChange, handleBlur }) => (
+                  <div>
+                    <input
+                      id="empleado"
+                      name="empleado"
+                      placeholder="Nombre del empleado"
+                      value={state.value}
+                      onChange={(e) => handleChange(e.target.value)}
+                      onBlur={handleBlur}
+                      disabled={true}
+                      required
+                      className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {state.meta.errors && (
+                      <span className="text-red-500 text-xs mt-1">{state.meta.errors.join(", ")}</span>
+                    )}
+                  </div>
+                )}
+              </form.Field>
             </div>
             <div>
-              <label htmlFor="fechaInicio" className="block text-sm font-medium mb-1">Fecha Inicio</label>
-              <input
+              <label htmlFor="motivo" className="block text-sm font-medium mb-1">
+                Motivo
+              </label>
+              <form.Field
+                name="motivo"
+                validators={{
+                  onChange: ({ value }) => (!value ? "El motivo es requerido" : undefined),
+                }}
+              >
+                {({ state, handleChange, handleBlur }) => (
+                  <div>
+                    <textarea
+                      id="motivo"
+                      name="motivo"
+                      placeholder="Motivo del permiso"
+                      value={state.value}
+                      onChange={(e) => handleChange(e.target.value)}
+                      onBlur={handleBlur}
+                      required
+                      rows={4}
+                      className="w-full border border-gray-300 px-4 py-2 rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {state.meta.errors && (
+                      <span className="text-red-500 text-xs mt-1">{state.meta.errors.join(", ")}</span>
+                    )}
+                  </div>
+                )}
+              </form.Field>
+            </div>
+            <div>
+              <label htmlFor="tipo" className="block text-sm font-medium mb-1">
+                Tipo de Permiso
+              </label>
+              <form.Field
+                name="tipo"
+                validators={{
+                  onChange: ({ value }) => (!value ? "El tipo es requerido" : undefined),
+                }}
+              >
+                {({ state, handleChange, handleBlur }) => (
+                  <div>
+                    <select
+                      id="tipo"
+                      name="tipo"
+                      value={state.value}
+                      onChange={(e) =>
+                        handleChange(e.target.value as "Vacaciones" | "Permiso personal" | "Asuntos medicos")
+                      }
+                      onBlur={handleBlur}
+                      className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="Permiso personal">Permiso personal</option>
+                      <option value="Vacaciones">Vacaciones</option>
+                      <option value="Asuntos medicos">Asuntos Médicos</option>
+                    </select>
+                    {state.meta.errors && (
+                      <span className="text-red-500 text-xs mt-1">{state.meta.errors.join(", ")}</span>
+                    )}
+                  </div>
+                )}
+              </form.Field>
+            </div>
+            <div>
+              <label htmlFor="fechaInicio" className="block text-sm font-medium mb-1">
+                Fecha Inicio
+              </label>
+              <form.Field
                 name="fechaInicio"
-                type="date"
-                value={formData.fechaInicio}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+                validators={{
+                  onChange: ({ value }) => (!value ? "La fecha de inicio es requerida" : undefined),
+                }}
+              >
+                {({ state, handleChange, handleBlur }) => (
+                  <div>
+                    <input
+                      id="fechaInicio"
+                      name="fechaInicio"
+                      type="date"
+                      value={state.value}
+                      onChange={(e) => handleChange(e.target.value)}
+                      onBlur={handleBlur}
+                      required
+                      className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {state.meta.errors && (
+                      <span className="text-red-500 text-xs mt-1">{state.meta.errors.join(", ")}</span>
+                    )}
+                  </div>
+                )}
+              </form.Field>
             </div>
             <div>
-              <label htmlFor="fechaFin" className="block text-sm font-medium mb-1">Fecha Fin</label>
-              <input
+              <label htmlFor="fechaFin" className="block text-sm font-medium mb-1">
+                Fecha Fin
+              </label>
+              <form.Field
                 name="fechaFin"
-                type="date"
-                value={formData.fechaFin}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+                validators={{
+                  onChange: ({ value, fieldApi }) => {
+                    if (!value) return "La fecha de fin es requerida";
+                    const fechaInicio = fieldApi.form.getFieldValue("fechaInicio");
+                    if (fechaInicio && value < fechaInicio) {
+                      return "La fecha de fin no puede ser anterior a la fecha de inicio";
+                    }
+                    return undefined;
+                  },
+                }}
+              >
+                {({ state, handleChange, handleBlur }) => (
+                  <div>
+                    <input
+                      id="fechaFin"
+                      name="fechaFin"
+                      type="date"
+                      value={state.value}
+                      onChange={(e) => handleChange(e.target.value)}
+                      onBlur={handleBlur}
+                      required
+                      className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {state.meta.errors && (
+                      <span className="text-red-500 text-xs mt-1">{state.meta.errors.join(", ")}</span>
+                    )}
+                  </div>
+                )}
+              </form.Field>
             </div>
           </div>
 
@@ -107,7 +213,7 @@ const FormularioPermiso = ({ onSuccess, onClose }: { onSuccess?: () => void, onC
             </button>
             <button
               type="button"
-              onClick={onClose} // Llama a la función para cerrar el modal
+              onClick={onClose}
               className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700"
             >
               Cerrar

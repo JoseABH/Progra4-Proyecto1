@@ -1,31 +1,32 @@
 // src/components/TablaEmpleados.tsx
-import { useState } from 'react'
 import {
   useReactTable,
   ColumnDef,
   getCoreRowModel,
   getPaginationRowModel,
   flexRender,
-} from '@tanstack/react-table'
-import { MoreVertical, Pencil, Trash2 } from 'lucide-react'
-import { Employee } from '../types/employee'
+} from '@tanstack/react-table';
+import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { Employee } from '../types/employee';
+import { useEmployeeTable } from '../hooks/useEmployeeTable';
 
 interface TablaEmpleadosProps {
-  data: Employee[]
-  onEdit?: (emp: Employee) => void
-  onDelete?: (id: number) => void
+  onEdit?: (emp: Employee) => void;
+  onDelete?: (id: number) => void;
 }
 
 export default function TablaEmpleados({
-  data,
   onEdit,
   onDelete,
 }: TablaEmpleadosProps) {
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null)
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 5,
-  })
+  const {
+    data,
+    loading,
+    openMenuId,
+    setOpenMenuId,
+    pagination,
+    setPagination,
+  } = useEmployeeTable();
 
   const columns: ColumnDef<Employee>[] = [
     { accessorKey: 'nombre', header: 'Nombre' },
@@ -35,26 +36,28 @@ export default function TablaEmpleados({
     {
       accessorKey: 'estado',
       header: 'Estado',
-      cell: info => {
-        const estado = info.getValue<string>()
+      cell: (info) => {
+        const estado = info.getValue<string>();
         const colorClasses =
           estado === 'Activo'
             ? 'bg-green-100 text-green-800'
             : estado === 'Ausente'
             ? 'bg-yellow-100 text-yellow-800'
-            : 'bg-red-100 text-red-800'
+            : 'bg-red-100 text-red-800';
         return (
-          <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${colorClasses}`}>
+          <span
+            className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${colorClasses}`}
+          >
             {estado}
           </span>
-        )
+        );
       },
     },
     {
       id: 'acciones',
       header: () => <span className="text-center">Acciones</span>,
       cell: ({ row }) => {
-        const emp = row.original
+        const emp = row.original;
         return (
           <div className="relative text-center">
             <button
@@ -70,13 +73,19 @@ export default function TablaEmpleados({
                 onMouseLeave={() => setOpenMenuId(null)}
               >
                 <div
-                  onClick={() => { setOpenMenuId(null); onEdit?.(emp) }}
+                  onClick={() => {
+                    setOpenMenuId(null);
+                    onEdit?.(emp);
+                  }}
                   className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                 >
                   <Pencil className="mr-2 h-4 w-4" /> Editar
                 </div>
                 <div
-                  onClick={() => { setOpenMenuId(null); onDelete?.(emp.id) }}
+                  onClick={() => {
+                    setOpenMenuId(null);
+                    onDelete?.(emp.id);
+                  }}
                   className="flex items-center px-3 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
                 >
                   <Trash2 className="mr-2 h-4 w-4" /> Eliminar
@@ -84,10 +93,10 @@ export default function TablaEmpleados({
               </div>
             )}
           </div>
-        )
+        );
       },
     },
-  ]
+  ];
 
   const table = useReactTable({
     data,
@@ -96,19 +105,21 @@ export default function TablaEmpleados({
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-  })
+  });
 
-  const rows = table.getRowModel().rows
-  const pageCount = table.getPageCount()
-  const currentPage = pagination.pageIndex + 1
+  const rows = table.getRowModel().rows;
+  const pageCount = table.getPageCount();
+  const currentPage = pagination.pageIndex + 1;
+
+  if (loading) return <div className="p-4 text-gray-500">Cargando...</div>;
 
   return (
     <div className="overflow-x-auto bg-white border border-gray-200 rounded-lg">
       <table className="min-w-full text-left">
         <thead className="border-b border-gray-200 bg-white">
-          {table.getHeaderGroups().map(headerGroup => (
+          {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
+              {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
                   className={`px-6 py-3 text-sm font-medium text-gray-700 ${
@@ -127,9 +138,9 @@ export default function TablaEmpleados({
           ))}
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {rows.map(row => (
+          {rows.map((row) => (
             <tr key={row.id} className="hover:bg-gray-50">
-              {row.getVisibleCells().map(cell => (
+              {row.getVisibleCells().map((cell) => (
                 <td
                   key={cell.id}
                   className={`px-6 py-4 text-sm text-gray-800 ${
@@ -146,7 +157,10 @@ export default function TablaEmpleados({
 
           {data.length === 0 && (
             <tr>
-              <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
+              <td
+                colSpan={6}
+                className="px-6 py-8 text-center text-sm text-gray-500"
+              >
                 No se encontraron empleados.
               </td>
             </tr>
@@ -176,5 +190,5 @@ export default function TablaEmpleados({
         </div>
       )}
     </div>
-  )
+  );
 }
