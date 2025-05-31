@@ -23,7 +23,7 @@ export const UserDashboard = () => {
   useEffect(() => {
     (async () => {
       try {
-        const emp = await getEmpleadoById(user.id_empleado);
+        const emp = await getEmpleadoById(user?.id);
         setEmpleado(emp);
       } catch {
         setError('Error cargando datos del empleado');
@@ -31,7 +31,7 @@ export const UserDashboard = () => {
         setLoading(false);
       }
     })();
-  }, [user.id_empleado]);
+  }, [user?.id]);
 
   if (loading) return <div className="p-8"><div className="p-6 flex  justify-center items-center h-screen">
     <div className="flex items-center justify-center h-screen">
