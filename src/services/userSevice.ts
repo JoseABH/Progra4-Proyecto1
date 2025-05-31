@@ -1,86 +1,52 @@
+// src/services/userService.ts
 import axios from 'axios';
 import { User } from '../types/user';
-const BIN = '6821d6798960c979a597e056';
-const USERS_API_URL = `https://api.jsonbin.io/v3/b/${BIN}`;
-const API_KEY = '$2a$10$/QleYdFWb/9K4gXxgb7Q8ezciNlUu8KD97Le3g1LEPaFucalVccQe';
 
-export const fetchUsers = async () => {
+const API_URL = 'https://localhost:7147/api/users';
+
+// Configuración básica de axios
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+export const fetchUsers = async (): Promise<User[]> => {
   try {
-    const response = await axios.get(USERS_API_URL, {
-      headers: {
-        'X-Access-Key': API_KEY,
-      },
-    });
-    const data = response.data?.record;
-    return Array.isArray(data) ? data : [];
+    const response = await api.get<User[]>('');
+    return response.data;
   } catch (error) {
     console.error('Error fetching users:', error);
-    return [];
+    throw new Error('Error al cargar los usuarios');
   }
 };
 
-export const createUser = async (newUser: Omit<User, 'id'>) => {
+export const createUser = async (userData: Omit<User, 'id'>): Promise<User> => {
   try {
-    const users = await fetchUsers();
-    const newId = users.length > 0 ? Math.max(...users.map((u: User) => u.id)) + 1 : 1;
-    const userToAdd = { ...newUser, id: newId };
-    const response = await axios.put(
-      USERS_API_URL,
-      [...users, userToAdd],
-      {
-        headers: {
-          'X-Access-Key': API_KEY,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    return response.data.record;
+    const response = await api.post<User>('', userData);
+    return response.data;
   } catch (error) {
     console.error('Error creating user:', error);
-    throw error;
+    throw new Error('Error al crear el usuario');
   }
 };
 
-export const updateUser = async (updatedUser: User) => {
+export const updateUser = async (user: User): Promise<User> => {
   try {
-    const users = await fetchUsers();
-    const updatedUsers = users.map((user: User) =>
-      user.id === updatedUser.id ? updatedUser : user
-    );
-    const response = await axios.put(
-      USERS_API_URL,
-      updatedUsers,
-      {
-        headers: {
-          'X-Access-Key': API_KEY,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    return response.data.record;
+    const response = await api.put<User>(`/${user.id}`, user);
+    return response.data;
   } catch (error) {
     console.error('Error updating user:', error);
-    throw error;
+    throw new Error('Error al actualizar el usuario');
   }
 };
 
-export const deleteUser = async (userId: number) => {
+export const deleteUser = async (userId: number): Promise<void> => {
   try {
-    const users = await fetchUsers();
-    const updatedUsers = users.filter((user: User) => user.id !== userId);
-    const response = await axios.put(
-      USERS_API_URL,
-      updatedUsers,
-      {
-        headers: {
-          'X-Access-Key': API_KEY,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    return response.data.record;
+    await api.delete(`/${userId}`);
   } catch (error) {
     console.error('Error deleting user:', error);
-    throw error;
+    throw new Error('Error al eliminar el usuario');
   }
 };
