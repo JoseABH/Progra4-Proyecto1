@@ -6,22 +6,22 @@ import { MdMapsHomeWork, MdExitToApp } from "react-icons/md";
 import { FaCalendarAlt, FaUsers, FaUserCog, FaUserCircle, FaCalendarPlus, FaCalendarWeek } from "react-icons/fa";
 import { AiFillHome } from "react-icons/ai";
 import BotonNavBar from "./BotonNavBar";
-import { useNavigate } from '@tanstack/react-router';
+// import { useNavigate } from '@tanstack/react-router';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
     const context = useContext(AuthContext);
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     if (!context) throw new Error("Layout debe estar dentro de un AuthProvider");
-    const { user, setUser } = context;
+    const { user, setUser,logout } = context;
 
-    const handleLogout = () => {
-        setUser(null);
-        localStorage.removeItem('user');
-        navigate({ to: '/login' });
-    };
+    // const handleLogout = () => {
+    //     setUser(null);
+    //     localStorage.removeItem('user');
+    //     navigate({ to: '/login' });
+    // };
 
-    const initials = user.name
+    const initials = user?.email || "User "
         .split(' ')
         .map((n: string) => n[0])
         .slice(0, 2)
@@ -39,7 +39,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                     Centro Agricola de Puntarenas
                 </div>
                 <div className="text-xl flex items-center gap-4">
-                    {user.role} | {user.name || "Invitado"}
+                    {user?.role} | {user?.role || "Invitado"}
                     <div
                         className="w-10 h-10 rounded-full flex items-center justify-center text-xl text-black"
                         style={{ backgroundColor: randomColor }}
@@ -57,7 +57,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         {/* Sidebar lateral colapsado */ }
         < aside className = "group relative bg-sky-900 text-white transition-all duration-300 h-full w-16 hover:w-64 overflow-hidden flex flex-col rounded-lg" >
                     <nav className="mt-10 space-y-4 px-2">
-                        {user.role === "Jefe de RRHH" ? (
+                        {user?.role === "Jefe de RRHH" || user?.role === "admin"  ? (
                             <>
                                 <BotonNavBar path="/" icono={<AiFillHome />} nombre="Home" />
                                 <BotonNavBar path="/CrearSolicitudes" icono={<FaCalendarPlus />} nombre="Crear Solicitudes" />
@@ -66,7 +66,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                                 <BotonNavBar path="/GestionSolicitudes" icono={<FaCalendarAlt />} nombre="Vista de Solicitudes" />
                                 <BotonNavBar path="/GestionUsers" icono={<FaUserCog />} nombre="Gestion Usuarios" />
                             </>
-                        ) : user.role === "Jefe de Departamento" ? (
+                        ) : user?.role === "Jefe de Departamento" ? (
                             <>
                                 <BotonNavBar path="/" icono={<AiFillHome />} nombre="Home" />
                                 <BotonNavBar path="/CrearSolicitudes" icono={<FaCalendarPlus />} nombre="Crear Solicitudes" />
@@ -82,7 +82,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
                     <div className="mt-auto px-2 mb-2 group  ">
                         <button
-                            onClick={handleLogout}
+                            onClick={logout}
                             className="w-full flex items-center px-3 py-2 text-white rounded hover:translate-x-2 hover:bg-sky-700  duration-200"
                         >
                             <MdExitToApp className="mr-2 text-xl" />

@@ -13,7 +13,7 @@ export default function Login() {
     throw new Error('AuthContext is undefined. Ensure AuthProvider is wrapping the component tree.');
   }
 
-  const { setUser } = authContext;
+  const { user, login, isError, isLoading } = authContext;
   const navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -22,19 +22,19 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      try {
-        const user: User = JSON.parse(savedUser);
-        setUser(user);
-        navigate({ to: '/' });
-      } catch (err) {
-        console.error('Error parsing saved user:', err);
-        localStorage.removeItem('user');
-      }
-    }
-  }, [setUser, navigate]);
+  // useEffect(() => {
+  //   const savedUser = localStorage.getItem('user');
+  //   if (savedUser) {
+  //     try {
+  //       const user: User = JSON.parse(savedUser);
+  //       // setUser(user);
+  //       navigate({ to: '/' });
+  //     } catch (err) {
+  //       console.error('Error parsing saved user:', err);
+  //       localStorage.removeItem('user');
+  //     }
+  //   }
+  // }, [setUser, navigate]);
 
   const handleLogin = async () => {
     const email = emailRef.current?.value;
@@ -49,28 +49,36 @@ export default function Login() {
     setError('');
 
     try {
-      const users = await fetchUsers();
-      const user = users.find(
-        (u: User) => u.email === email && u.password === password
-      );
 
-      if (user) {
+
+      login(email, password)
+      // const users = await fetchUsers();
+      // const user = users.find(
+      //   (u: User) => u.email === email && u.password === password
+      // );
+      
+      // if (user) {
         // Instead of immediately navigating, first set loginSuccess to true
-        setLoginSuccess(true);
-        setUser(user);
-        if (rememberMe) {
-          localStorage.setItem('user', JSON.stringify(user));
-        } else {
-          localStorage.removeItem('user');
-        }
-        
-        // Wait for the fade-out animation to complete before navigating
+
+        //  setUser(user);
+        //   if (rememberMe) {
+        //     localStorage.setItem('user', JSON.stringify(user));
+        //   } else {
+        //     localStorage.removeItem('user');
+        //   }
+
+        //   // Wait for the fade-out animation to complete before navigating
+        //   setTimeout(() => {
+        //     navigate({ to: '/' });
+        //   }, 800); // Match this with the CSS transition duration
+
         setTimeout(() => {
           navigate({ to: '/' });
-        }, 800); // Match this with the CSS transition duration
-      } else {
-        setError('Credenciales incorrectas');
-      }
+        }, 800);
+      // } else {
+      //   setError('Credenciales incorrectas');
+      // }
+
     } catch (err) {
       console.error('Error fetching users:', err);
       setError('Error al validar credenciales. Intente de nuevo.');
@@ -85,15 +93,15 @@ export default function Login() {
     <div className={`flex flex-col items-center max-w-md w-full transition-opacity duration-800 ease-in-out ${loginSuccess ? 'opacity-0' : 'opacity-100'}`}>
       <div className="bg-white rounded-lg shadow-md p-8 w-full border border-gray-200">
         <div className="flex flex-col items-center mb-6">
-          <img 
-            src="https://static.wixstatic.com/media/79ed12_8722dd62a5474ede83b761ba66cbf2f3~mv2.jpg/v1/fill/w_238,h_238,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/79ed12_8722dd62a5474ede83b761ba66cbf2f3~mv2.jpg" 
-            alt="Centro Agricola de Puntarenas" 
+          <img
+            src="https://static.wixstatic.com/media/79ed12_8722dd62a5474ede83b761ba66cbf2f3~mv2.jpg/v1/fill/w_238,h_238,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/79ed12_8722dd62a5474ede83b761ba66cbf2f3~mv2.jpg"
+            alt="Centro Agricola de Puntarenas"
             className="w-24 h-24 rounded-full mb-4"
           />
           <h1 className="text-2xl font-semibold text-gray-800">Recursos Humanos</h1>
           <p className="text-sm text-gray-600 mt-1">Centro Agrícola de Puntarenas</p>
         </div>
-        
+
         <form className="space-y-5">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -110,7 +118,7 @@ export default function Login() {
               />
             </div>
           </div>
-          
+
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Contraseña
@@ -126,7 +134,7 @@ export default function Login() {
               />
             </div>
           </div>
-          
+
           <div className="flex items-center">
             <input
               id="rememberMe"
@@ -139,7 +147,7 @@ export default function Login() {
               Mantener sesión iniciada
             </label>
           </div>
-          
+
           <button
             type="button"
             onClick={handleLogin}
@@ -155,7 +163,7 @@ export default function Login() {
               'Iniciar Sesión'
             )}
           </button>
-          
+
           {error && (
             <div className="bg-red-50 border border-red-200 p-3 rounded-md text-sm text-red-600">
               {error}
