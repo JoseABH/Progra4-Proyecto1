@@ -5,6 +5,7 @@ import { decodeToken, client as axiosClient } from '../services/AuthService'
 // 1. Tipo para el usuario
 interface User {
   email: string
+   name: string
   role: string
   id: string
   [key: string]: any // para otros campos del token
@@ -41,7 +42,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setToken(newToken)
 
     const data = decodeToken(newToken) 
-    const newUser = { email: data.email, role: data.role, id: data.id }
+    const newUser = {name: data.name  ,email: data.email, role: data.role, id: data.id }
     setUser(newUser)
     return newUser
   }
@@ -59,7 +60,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setToken(stored)
       axiosClient.defaults.headers.common.Authorization = `Bearer ${stored}`
       const data = decodeToken(stored) as User
-      setUser({ email: data.email, role: data.role, id: data.id })
+      setUser({ name: data.name  ,email: data.email, role: data.role, id: data.id })
     }
   }, [])
 

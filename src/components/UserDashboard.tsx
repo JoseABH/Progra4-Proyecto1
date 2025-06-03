@@ -20,18 +20,18 @@ export const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const emp = await getEmpleadoById(user?.id);
-        setEmpleado(emp);
-      } catch {
-        setError('Error cargando datos del empleado');
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [user?.id]);
+  // useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       const emp = await getEmpleadoById(Number(user?.id));
+  //       setEmpleado(emp);
+  //     } catch {
+  //       setError('Error cargando datos del empleado');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   })();
+  // }, [user?.name]);
 
   if (loading) return <div className="p-8"><div className="p-6 flex  justify-center items-center h-screen">
     <div className="flex items-center justify-center h-screen">
@@ -50,7 +50,8 @@ export const UserDashboard = () => {
   if (error) return <div className="p-8 text-red-600">{error}</div>;
   if (!empleado) return <div className="p-8">Empleado no encontrado.</div>;
 
-  const initials = empleado.nombre
+  //const initials = empleado.nombre
+  const initials = user?.name
     .split(' ')
     .map((n: string) => n[0])
     .slice(0, 2)

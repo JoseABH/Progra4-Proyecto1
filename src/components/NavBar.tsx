@@ -13,7 +13,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     // const navigate = useNavigate();
 
     if (!context) throw new Error("Layout debe estar dentro de un AuthProvider");
-    const { user, setUser,logout } = context;
+    const { user,logout } = context;
 
     // const handleLogout = () => {
     //     setUser(null);
@@ -21,7 +21,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     //     navigate({ to: '/login' });
     // };
 
-    const initials = user?.email || "User "
+    const initials = user?.name
         .split(' ')
         .map((n: string) => n[0])
         .slice(0, 2)
@@ -39,7 +39,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                     Centro Agricola de Puntarenas
                 </div>
                 <div className="text-xl flex items-center gap-4">
-                    {user?.role} | {user?.role || "Invitado"}
+                    {user?.role} | {user?.name || "Invitado"}
                     <div
                         className="w-10 h-10 rounded-full flex items-center justify-center text-xl text-black"
                         style={{ backgroundColor: randomColor }}
