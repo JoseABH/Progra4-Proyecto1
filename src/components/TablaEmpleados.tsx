@@ -1,49 +1,48 @@
 // src/components/TablaEmpleados.tsx
+
+import React from "react";
 import {
   useReactTable,
   ColumnDef,
   getCoreRowModel,
   getPaginationRowModel,
   flexRender,
-} from '@tanstack/react-table';
-import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
-import { Employee } from '../types/employee';
-import { useEmployeeTable } from '../hooks/useEmployeeTable';
+} from "@tanstack/react-table";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Employee } from "../types/employee";
 
+/**
+ * Ahora incluimos "data: Employee[]" en la interfaz de props,
+ * ya que la página le pasará el array filtrado.
+ */
 interface TablaEmpleadosProps {
+  data: Employee[];
   onEdit?: (emp: Employee) => void;
   onDelete?: (id: number) => void;
 }
 
 export default function TablaEmpleados({
+  data,
   onEdit,
   onDelete,
 }: TablaEmpleadosProps) {
-  const {
-    data,
-    loading,
-    openMenuId,
-    setOpenMenuId,
-    pagination,
-    setPagination,
-  } = useEmployeeTable();
-
+  // Aquí se definen las columnas para React Table
   const columns: ColumnDef<Employee>[] = [
-    { accessorKey: 'nombre', header: 'Nombre' },
-    { accessorKey: 'correo', header: 'Correo Electrónico' },
-    { accessorKey: 'departamento', header: 'Departamento' },
-    { accessorKey: 'cargo', header: 'Cargo' },
+    { accessorKey: "nombre", header: "Nombre" },
+    { accessorKey: "correo", header: "Correo Electrónico" },
+    { accessorKey: "departamento", header: "Departamento" },
+    { accessorKey: "cargo", header: "Cargo" },
     {
-      accessorKey: 'estado',
-      header: 'Estado',
+      accessorKey: "estado",
+      header: "Estado",
       cell: (info) => {
         const estado = info.getValue<string>();
         const colorClasses =
-          estado === 'Activo'
-            ? 'bg-green-100 text-green-800'
-            : estado === 'Ausente'
-            ? 'bg-yellow-100 text-yellow-800'
-            : 'bg-red-100 text-red-800';
+          estado === "Activo"
+            ? "bg-green-100 text-green-800"
+            : estado === "Ausente"
+            ? "bg-yellow-100 text-yellow-800"
+            : "bg-red-100 text-red-800";
         return (
           <span
             className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${colorClasses}`}
@@ -54,14 +53,21 @@ export default function TablaEmpleados({
       },
     },
     {
-      id: 'acciones',
+      id: "acciones",
       header: () => <span className="text-center">Acciones</span>,
       cell: ({ row }) => {
         const emp = row.original;
+        // Cada celda de “Acciones” puede tener su propio estado para el menú
+        const [openMenuId, setOpenMenuId] = React.useState<number | null>(
+          null
+        );
+
         return (
           <div className="relative text-center">
             <button
-              onClick={() => setOpenMenuId(openMenuId === emp.id ? null : emp.id)}
+              onClick={() =>
+                setOpenMenuId(openMenuId === emp.id ? null : emp.id)
+              }
               className="p-1 hover:text-gray-700 hover:bg-gray-100 rounded-full transition"
             >
               <MoreVertical />
@@ -98,20 +104,17 @@ export default function TablaEmpleados({
     },
   ];
 
+  // Construimos la tabla usando el arreglo "data" enviado desde la página
   const table = useReactTable({
     data,
     columns,
-    state: { pagination },
-    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
 
   const rows = table.getRowModel().rows;
   const pageCount = table.getPageCount();
-  const currentPage = pagination.pageIndex + 1;
-
-  if (loading) return <div className="p-4 text-gray-500">Cargando...</div>;
+  const currentPage = table.getState().pagination.pageIndex + 1;
 
   return (
     <div className="overflow-x-auto bg-white border border-gray-200 rounded-lg">
@@ -123,7 +126,7 @@ export default function TablaEmpleados({
                 <th
                   key={header.id}
                   className={`px-6 py-3 text-sm font-medium text-gray-700 ${
-                    header.id === 'acciones' ? 'text-center' : ''
+                    header.id === "acciones" ? "text-center" : ""
                   }`}
                 >
                   {header.isPlaceholder
@@ -144,9 +147,9 @@ export default function TablaEmpleados({
                 <td
                   key={cell.id}
                   className={`px-6 py-4 text-sm text-gray-800 ${
-                    cell.column.id === 'acciones'
-                      ? 'text-center text-gray-500 relative'
-                      : ''
+                    cell.column.id === "acciones"
+                      ? "text-center text-gray-500 relative"
+                      : ""
                   }`}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}

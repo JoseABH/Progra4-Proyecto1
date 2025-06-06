@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaUsers, FaUserCheck, FaUserTimes, FaUserClock } from "react-icons/fa";
 
-import { getEmpleados } from "../services/GestionEmpleadosService";
+import { empleadoService } from "../services/GestionEmpleadosService";
 import { Employee } from "../types/employee";
 
 export const EstadisticasEmpleados = () => {
@@ -10,7 +10,8 @@ export const EstadisticasEmpleados = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getEmpleados()
+    empleadoService
+      .getAll() // ← Llamamos a getAll() en lugar de getEmpleados()
       .then((data) => {
         setEmpleados(data);
         setLoading(false);
@@ -20,7 +21,6 @@ export const EstadisticasEmpleados = () => {
         setLoading(false);
       });
   }, []);
-
   if (loading)
     return <div className="p-6 text-center text-gray-500">Cargando...</div>;
 
