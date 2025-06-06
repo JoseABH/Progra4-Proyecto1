@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { User } from '../types/user'
 import { Employee } from '../types/employee'
-import { getEmpleados } from '../services/GestionEmpleadosService'
+import { empleadoService } from "../services/GestionEmpleadosService";
+
 
 interface UserFormProps {
   user?: User
@@ -54,13 +55,14 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
   })
 
   // 2) Cargamos empleados para el dropdown
-  useEffect(() => {
-    setLoadingEmployees(true)
-    getEmpleados()
-      .then(setEmployees)
-      .catch(() => setEmployees([]))
-      .finally(() => setLoadingEmployees(false))
-  }, [])
+ useEffect(() => {
+  setLoadingEmployees(true);
+  empleadoService.getAll() // ← aquí
+    .then(setEmployees)
+    .catch(() => setEmployees([]))
+    .finally(() => setLoadingEmployees(false));
+}, []);
+
 
   // 3) Sincronizamos valores del user prop al form
   useEffect(() => {

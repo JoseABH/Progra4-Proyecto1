@@ -1,49 +1,51 @@
 // src/services/GestionEmpleadosService.ts
 
-import axios from "axios";
 import { Employee } from "../types/employee";
+import { client } from "./AuthService"; 
 
-const BIN_ID     = "682291ac8960c979a59844dc";
-const ACCESS_KEY = "$2a$10$Qezppy1o5Y8Fm3ab6pfHB.ZivJSeJgzx1ERSldBy24y2M6KqWAyKO";
-const BASE_URL   = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
-// Cliente Axios preconfigurado para JSONBin
-const api = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    "X-Access-Key": ACCESS_KEY,
-    "Content-Type": "application/json",
+export const empleadoService = {
+  /**
+   * GET /api/employees
+   * → Devuelve array de Employee[]
+   */
+  async getAll(): Promise<Employee[]> {
+    const res = await client.get<Employee[]>("/api/employees");
+    return res.data;
   },
-});
 
-/**
- * GET /latest → Employee[]
- */
-export async function getEmpleados(): Promise<Employee[]> {
-  const res = await api.get("/latest");
-  const record = res.data.record;
-  // JSONBin a veces envuelve el array en { record: [...] }
-  return Array.isArray(record) ? record : record.record;
-}
+  /**
+   * GET /api/employees/{id}
+   * → Devuelve un solo Employee
+   */
+  async getById(id: number): Promise<Employee> {
+    const res = await client.get<Employee>(`/api/employees/${id}`);
+    return res.data;
+  },
 
-/**
- * GET por ID → Employee
- */
-export async function getEmpleadoById(id: number): Promise<Employee> {
-  const emps = await getEmpleados();
-  const emp  = emps.find(e => e.id === id);
-  if (!emp) {
-    throw new Error(`Empleado con id ${id} no encontrado`);
-  }
-  return emp;
-}
+  /**
+   * POST /api/employees
+   * → Crear un nuevo empleado (recibe Omit<Employee,"id">)
+   *    y devuelve el Employee creado con su id.
+   */
+  async create(data: Omit<Employee, "id">): Promise<Employee> {
+    const res = await client.post<Employee>("/api/employees", data);
+    return res.data;
+  },
 
-/**
- * PUT (sobrescribe todo el bin) → no return
- */
-export async function saveEmpleados(arr: Employee[]): Promise<void> {
-  // Si JSONBin espera directamente el array:
-  await api.put("", arr);
-  // Si JSONBin espera { record: [...] }, usar en su lugar:
-  // await api.put("", { record: arr });
-}
+  /**
+   * PUT /api/employees/{id}
+   * → Actualiza un empleado existente. No devuelve body (Promise<void>).
+   */
+  async update(id: number, data: Employee): Promise<void> {
+    await client.put(`/api/employees/${id}`, data);
+  },
+
+  /**
+   * DELETE /api/employees/{id}
+   * → Elimina un empleado. No devuelve body (Promise<void>).
+   */
+  async delete(id: number): Promise<void> {
+    await client.delete(`/api/employees/${id}`);
+  },
+};

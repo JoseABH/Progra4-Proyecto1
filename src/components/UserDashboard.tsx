@@ -10,7 +10,7 @@ import {
 import { EstadisticasSolicitudes } from "./EstadisticasSolicitudes";
 import { EstadisticasEmpleados } from "../components/EstadisticasEmpleados";
 import { AuthContext } from '../Context/AuthContext';
-import { getEmpleadoById } from '../services/GestionEmpleadosService';
+import { empleadoService } from "../services/GestionEmpleadosService";
 import { Employee } from '../types/employee';
 import Loading from './Loading';
 
@@ -21,20 +21,48 @@ export const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // useEffect(() => {
-  //   (async () => {
-  //     try {
-  //       const emp = await getEmpleadoById(Number(user?.id));
-  //       setEmpleado(emp);
-  //     } catch {
-  //       setError('Error cargando datos del empleado');
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   })();
-  // }, [user?.name]);
 
   if (loading) return <Loading></Loading>;
+
+ useEffect(() => {
+    // Si no tenemos user o user.id, no hacemos nada
+    if (!user || !user.id) {
+      setError("Usuario no válido");
+      setLoading(false);
+      return;
+    }
+
+    (async () => {
+      setLoading(true);
+      try {
+        // Convertimos user.id (string) a number antes de pasarlo a getById
+        const emp = await empleadoService.getById(Number(user.id));
+        setEmpleado(emp);
+        setError(null);
+      } catch (err) {
+        console.error("Error cargando datos del empleado:", err);
+        setError("Error cargando datos del empleado");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [user]);
+
+  if (loading) return <div className="p-8"><div className="p-6 flex  justify-center items-center h-screen">
+    <div className="flex items-center justify-center h-screen">
+      <div className="w-80 p-5 rounded-xl shadow-lg bg-white animate-pulse space-y-3">
+        <div className="h-6 w-2/3 bg-slate-300 rounded" />
+        <div className="h-4 w-full bg-slate-300 rounded" />
+        <div className="h-4 w-5/6 bg-slate-300 rounded" />
+        <div className="h-4 w-4/6 bg-slate-300 rounded" />
+        <div className="h-4 w-2/3 bg-slate-300 rounded" />
+        <p>Cargando datos...</p>
+      </div>
+
+    </div>
+
+  </div></div>;
+
   if (error) return <div className="p-8 text-red-600">{error}</div>;
   if (!empleado) return <div className="p-8">Empleado no encontrado.</div>;
 
