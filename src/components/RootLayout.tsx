@@ -18,8 +18,7 @@ const RootLayout = () => {
         <div className="min-h-screen flex flex-col bg-gray-900">
             {user ?
                 <div>
-                    <NavBar><Outlet /></NavBar>
-                    
+                    <NavBar><Outlet /></NavBar> 
                 </div> 
              : <LoginPage />}
         </div>

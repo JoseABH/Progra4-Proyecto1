@@ -12,6 +12,7 @@ import { EstadisticasEmpleados } from "../components/EstadisticasEmpleados";
 import { AuthContext } from '../Context/AuthContext';
 import { getEmpleadoById } from '../services/GestionEmpleadosService';
 import { Employee } from '../types/employee';
+import Loading from './Loading';
 
 export const UserDashboard = () => {
   const { user } = useContext(AuthContext)!;
@@ -33,20 +34,7 @@ export const UserDashboard = () => {
   //   })();
   // }, [user?.name]);
 
-  if (loading) return <div className="p-8"><div className="p-6 flex  justify-center items-center h-screen">
-    <div className="flex items-center justify-center h-screen">
-      <div className="w-80 p-5 rounded-xl shadow-lg bg-white animate-pulse space-y-3">
-        <div className="h-6 w-2/3 bg-slate-300 rounded" />
-        <div className="h-4 w-full bg-slate-300 rounded" />
-        <div className="h-4 w-5/6 bg-slate-300 rounded" />
-        <div className="h-4 w-4/6 bg-slate-300 rounded" />
-        <div className="h-4 w-2/3 bg-slate-300 rounded" />
-        <p>Cargando datos...</p>
-      </div>
-
-    </div>
-
-  </div></div>;
+  if (loading) return <Loading></Loading>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
   if (!empleado) return <div className="p-8">Empleado no encontrado.</div>;
 
