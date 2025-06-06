@@ -1,20 +1,31 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { Permiso } from "../types/Permiso";
 import { usePermisos } from "../hooks/usePermisos";
 import { AuthContext } from "../Context/AuthContext";
 
-const FormularioPermiso = ({ onSuccess, onClose }: { onSuccess?: () => void; onClose?: () => void }) => {
+const FormularioPermiso = ({
+  onSuccess,
+  onClose,
+}: {
+  onSuccess?: () => void;
+  onClose?: () => void;
+}) => {
   const { addPermiso } = usePermisos();
   const { user } = useContext(AuthContext)!;
-  
+  const [error, setError] = useState<string | null>(null);
 
+  // Determinar estadoProceso según rol actual (ajusta si cambias lógica)
+  const proceso =
+    user?.role === "Usuario Comun"
+      ? "Jefe de Departamento"
+      : user?.role === "Jefe de Departamento"
+      ? "Jefe de RRHH"
+      : "Jefe de RRHH";
 
-const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.role === "Jefe de Departamento" ? "Jefe de RRHH": "Jefe de RRHH";
-
-  const form = useForm<Omit<Permiso, "id">, any, any, any, any, any, any, any, any, any>({
+  const form = useForm<Omit<Permiso, "id">>({
     defaultValues: {
-      empleado: user.name,
+      empleado: user?.name,
       motivo: "",
       tipo: "Permiso personal" as const,
       fechaInicio: "",
@@ -23,18 +34,28 @@ const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.r
       estadoProceso: proceso,
     },
     onSubmit: async ({ value }) => {
-      await addPermiso(value);
-      onSuccess?.();
-      alert("Permiso creado correctamente");
-      onClose?.();
+      setError(null);
+      try {
+        await addPermiso(value); // addPermiso debe hacer POST al backend con la data
+        onSuccess?.();
+        alert("Permiso creado correctamente");
+        onClose?.();
+      } catch (e: any) {
+        // Mostrar error si falla la creación
+        setError(e?.message || "Error al crear la solicitud");
+      }
     },
   });
-
 
   return (
     <div className="crearSolicitudP fixed inset-0 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl">
-        <h2 className="text-xl font-bold mb-4 text-center">Crear Solicitud de Permiso</h2>
+        <h2 className="text-xl font-bold mb-4 text-center">
+          Crear Solicitud de Permiso
+        </h2>
+        {error && (
+          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">{error}</div>
+        )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -43,9 +64,14 @@ const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.r
           }}
           className="space-y-4"
         >
+          {/* Campos del formulario (idénticos a lo que tienes) */}
+          {/* Empleado */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="empleado" className="block text-sm font-medium mb-1">
+              <label
+                htmlFor="empleado"
+                className="block text-sm font-medium mb-1"
+              >
                 Empleado
               </label>
               <form.Field
@@ -68,12 +94,15 @@ const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.r
                       className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     {state.meta.errors && (
-                      <span className="text-red-500 text-xs mt-1">{state.meta.errors.join(", ")}</span>
+                      <span className="text-red-500 text-xs mt-1">
+                        {state.meta.errors.join(", ")}
+                      </span>
                     )}
                   </div>
                 )}
               </form.Field>
             </div>
+            {/* Motivo */}
             <div>
               <label htmlFor="motivo" className="block text-sm font-medium mb-1">
                 Motivo
@@ -98,12 +127,15 @@ const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.r
                       className="w-full border border-gray-300 px-4 py-2 rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     {state.meta.errors && (
-                      <span className="text-red-500 text-xs mt-1">{state.meta.errors.join(", ")}</span>
+                      <span className="text-red-500 text-xs mt-1">
+                        {state.meta.errors.join(", ")}
+                      </span>
                     )}
                   </div>
                 )}
               </form.Field>
             </div>
+            {/* Tipo de permiso */}
             <div>
               <label htmlFor="tipo" className="block text-sm font-medium mb-1">
                 Tipo de Permiso
@@ -121,7 +153,9 @@ const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.r
                       name="tipo"
                       value={state.value}
                       onChange={(e) =>
-                        handleChange(e.target.value as "Vacaciones" | "Permiso personal" | "Asuntos medicos")
+                        handleChange(
+                          e.target.value as "Vacaciones" | "Permiso personal" | "Asuntos medicos"
+                        )
                       }
                       onBlur={handleBlur}
                       className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -131,20 +165,27 @@ const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.r
                       <option value="Asuntos medicos">Asuntos Médicos</option>
                     </select>
                     {state.meta.errors && (
-                      <span className="text-red-500 text-xs mt-1">{state.meta.errors.join(", ")}</span>
+                      <span className="text-red-500 text-xs mt-1">
+                        {state.meta.errors.join(", ")}
+                      </span>
                     )}
                   </div>
                 )}
               </form.Field>
             </div>
+            {/* Fecha Inicio */}
             <div>
-              <label htmlFor="fechaInicio" className="block text-sm font-medium mb-1">
+              <label
+                htmlFor="fechaInicio"
+                className="block text-sm font-medium mb-1"
+              >
                 Fecha Inicio
               </label>
               <form.Field
                 name="fechaInicio"
                 validators={{
-                  onChange: ({ value }) => (!value ? "La fecha de inicio es requerida" : undefined),
+                  onChange: ({ value }) =>
+                    !value ? "La fecha de inicio es requerida" : undefined,
                 }}
               >
                 {({ state, handleChange, handleBlur }) => (
@@ -160,12 +201,15 @@ const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.r
                       className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     {state.meta.errors && (
-                      <span className="text-red-500 text-xs mt-1">{state.meta.errors.join(", ")}</span>
+                      <span className="text-red-500 text-xs mt-1">
+                        {state.meta.errors.join(", ")}
+                      </span>
                     )}
                   </div>
                 )}
               </form.Field>
             </div>
+            {/* Fecha Fin */}
             <div>
               <label htmlFor="fechaFin" className="block text-sm font-medium mb-1">
                 Fecha Fin
@@ -196,7 +240,9 @@ const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.r
                       className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     {state.meta.errors && (
-                      <span className="text-red-500 text-xs mt-1">{state.meta.errors.join(", ")}</span>
+                      <span className="text-red-500 text-xs mt-1">
+                        {state.meta.errors.join(", ")}
+                      </span>
                     )}
                   </div>
                 )}

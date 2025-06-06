@@ -12,6 +12,7 @@ import { EstadisticasEmpleados } from "../components/EstadisticasEmpleados";
 import { AuthContext } from '../Context/AuthContext';
 import { empleadoService } from "../services/GestionEmpleadosService";
 import { Employee } from '../types/employee';
+import Loading from './Loading';
 
 export const UserDashboard = () => {
   const { user } = useContext(AuthContext)!;
@@ -19,6 +20,9 @@ export const UserDashboard = () => {
   const [empleado, setEmpleado] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+
+  if (loading) return <Loading></Loading>;
 
  useEffect(() => {
     // Si no tenemos user o user.id, no hacemos nada
@@ -58,10 +62,12 @@ export const UserDashboard = () => {
     </div>
 
   </div></div>;
+
   if (error) return <div className="p-8 text-red-600">{error}</div>;
   if (!empleado) return <div className="p-8">Empleado no encontrado.</div>;
 
-  const initials = empleado.nombre
+  //const initials = empleado.nombre
+  const initials = user?.name
     .split(' ')
     .map((n: string) => n[0])
     .slice(0, 2)
