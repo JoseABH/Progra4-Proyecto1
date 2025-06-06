@@ -1,52 +1,42 @@
 // src/services/userService.ts
-import axios from 'axios';
 import { User } from '../types/user';
-
-const API_URL = 'https://localhost:7147/api/users';
-
-// Configuración básica de axios
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+import { client } from './AuthService';
 
 export const fetchUsers = async (): Promise<User[]> => {
   try {
-    const response = await api.get<User[]>('');
+    const response = await client.get('/api/users');
     return response.data;
   } catch (error) {
     console.error('Error fetching users:', error);
-    throw new Error('Error al cargar los usuarios');
+    return [];
   }
 };
 
-export const createUser = async (userData: Omit<User, 'id'>): Promise<User> => {
+export const createUser = async (newUser: Omit<User, 'id'>): Promise<User> => {
   try {
-    const response = await api.post<User>('', userData);
+    const response = await client.post('/api/users', newUser);
     return response.data;
   } catch (error) {
     console.error('Error creating user:', error);
-    throw new Error('Error al crear el usuario');
+    throw error;
   }
 };
 
-export const updateUser = async (user: User): Promise<User> => {
+export const updateUser = async (updatedUser: User): Promise<User> => {
   try {
-    const response = await api.put<User>(`/${user.id}`, user);
+    const response = await client.put(`/api/users/${updatedUser.id}`, updatedUser);
     return response.data;
   } catch (error) {
     console.error('Error updating user:', error);
-    throw new Error('Error al actualizar el usuario');
+    throw error;
   }
 };
 
 export const deleteUser = async (userId: number): Promise<void> => {
   try {
-    await api.delete(`/${userId}`);
+    await client.delete(`/api/users/${userId}`);
   } catch (error) {
     console.error('Error deleting user:', error);
-    throw new Error('Error al eliminar el usuario');
+    throw error;
   }
 };
