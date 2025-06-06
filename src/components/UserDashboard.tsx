@@ -10,7 +10,7 @@ import {
 import { EstadisticasSolicitudes } from "./EstadisticasSolicitudes";
 import { EstadisticasEmpleados } from "../components/EstadisticasEmpleados";
 import { AuthContext } from '../Context/AuthContext';
-import { getEmpleadoById } from '../services/GestionEmpleadosService';
+import { empleadoService } from "../services/GestionEmpleadosService";
 import { Employee } from '../types/employee';
 
 export const UserDashboard = () => {
@@ -20,18 +20,29 @@ export const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+ useEffect(() => {
+    // Si no tenemos user o user.id, no hacemos nada
+    if (!user || !user.id) {
+      setError("Usuario no válido");
+      setLoading(false);
+      return;
+    }
+
     (async () => {
+      setLoading(true);
       try {
-        const emp = await getEmpleadoById(user?.id);
+        // Convertimos user.id (string) a number antes de pasarlo a getById
+        const emp = await empleadoService.getById(Number(user.id));
         setEmpleado(emp);
-      } catch {
-        setError('Error cargando datos del empleado');
+        setError(null);
+      } catch (err) {
+        console.error("Error cargando datos del empleado:", err);
+        setError("Error cargando datos del empleado");
       } finally {
         setLoading(false);
       }
     })();
-  }, [user?.id]);
+  }, [user]);
 
   if (loading) return <div className="p-8"><div className="p-6 flex  justify-center items-center h-screen">
     <div className="flex items-center justify-center h-screen">
