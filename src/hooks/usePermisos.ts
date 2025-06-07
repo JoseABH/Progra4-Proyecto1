@@ -11,7 +11,7 @@ export function usePermisos() {
       setPermisos(data);
       setLoading(false);
     });
-  }, []);
+  }, [permisos]);
 
   const addPermiso = async (nuevo: Omit<Permiso, "id">) => {
     const creado = await permisoService.create(nuevo);

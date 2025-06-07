@@ -3,11 +3,17 @@ import { usePermisos } from "../hooks/usePermisos";
 import ModalRevision from "../components/ModalRevision";
 import { AuthContext } from "../Context/AuthContext";
 import ListaSolicitudes from "../components/ListaSolicitudes";
+import { UserDashboard } from "../components/UserDashboard";
 
 const SolicitudesPage = () => {
   const { permisos, loading } = usePermisos();
   const [seleccionado, setSeleccionado] = useState<number | null>(null);
-  const { user } = useContext(AuthContext)!;
+  const context = useContext(AuthContext)
+
+  if (!context) {
+    throw new Error('Login debe estar dentro de un AuthProvider')
+  }
+  const { user } = context
 
   if (loading) {
     return (
@@ -35,24 +41,32 @@ const SolicitudesPage = () => {
   const permisoActual = permisos.find((p) => p.id === seleccionado);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-12 text-black">
-      <h1 className="text-3xl font-extrabold text-center text-gray-800 tracking-tight">
-        Solicitudes de Permiso
-      </h1>
 
-      <ListaSolicitudes
-        titulo="Pendientes de revisión"
-        permisos={pendientes}
-        revisable
-        onSeleccionar={setSeleccionado}
-      />
+    <>
 
-      <ListaSolicitudes titulo="Otras solicitudes" permisos={otras} />
 
-      {permisoActual && (
-        <ModalRevision permiso={permisoActual} onClose={() => setSeleccionado(null)} />
-      )}
-    </div>
+      {user?.role === "Jefe de RRHH" || user?.role === "Jefe de Departamento" ?
+        <div className="p-6 max-w-5xl mx-auto space-y-12 text-black">
+          <h1 className="text-3xl font-extrabold text-center text-gray-800 tracking-tight">
+            Solicitudes de Permiso
+          </h1>
+
+          <ListaSolicitudes
+            titulo="Pendientes de revisión"
+            permisos={pendientes}
+            revisable
+            onSeleccionar={setSeleccionado}
+          />
+
+          <ListaSolicitudes titulo="Otras solicitudes" permisos={otras} />
+
+          {permisoActual && (
+            <ModalRevision permiso={permisoActual} onClose={() => setSeleccionado(null)} />
+          )}
+        </div>
+        : <UserDashboard />}
+    </>
+
   );
 };
 

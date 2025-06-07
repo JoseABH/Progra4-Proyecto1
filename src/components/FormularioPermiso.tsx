@@ -54,7 +54,7 @@ const FormularioPermiso = ({
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-2">
             Crear Solicitud de Permiso
           </h2>
-          <div className="w-20 h-1 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto rounded-full"></div>
+          <div className="w-20 h-1 bg-gradient-to-r from-sky-500 to-sky-900 mx-auto rounded-full"></div>
         </div>
         
         {error && (
@@ -291,7 +291,7 @@ const FormularioPermiso = ({
           <div className="flex flex-col sm:flex-row justify-center gap-4 pt-6 border-t border-gray-100">
             <button
               type="submit"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center space-x-2"
+              className="bg-gradient-to-r from-sky-600 to-sky-900 text-white px-8 py-3 rounded-xl hover:from-sky-500 hover:to-sky-900 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center space-x-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
