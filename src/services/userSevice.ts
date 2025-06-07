@@ -11,7 +11,6 @@ export const fetchUsers = async (): Promise<User[]> => {
     return [];
   }
 };
-
 export const createUser = async (newUser: Omit<User, 'id'>): Promise<User> => {
   try {
     const response = await client.post('/api/users', newUser);
@@ -21,17 +20,17 @@ export const createUser = async (newUser: Omit<User, 'id'>): Promise<User> => {
     throw error;
   }
 };
-
 export const updateUser = async (updatedUser: User): Promise<User> => {
   try {
-    const response = await client.put(`/api/users/${updatedUser.id}`, updatedUser);
+    const userToSend = { ...updatedUser,
+      id_empleado: updatedUser.id_empleado ?? 0, // Valor por defecto 0 si es null
+    };
+    const response = await client.put(`/api/users/${updatedUser.id}`, userToSend);
     return response.data;
   } catch (error) {
-    console.error('Error updating user:', error);
     throw error;
   }
 };
-
 export const deleteUser = async (userId: number): Promise<void> => {
   try {
     await client.delete(`/api/users/${userId}`);
