@@ -3,13 +3,11 @@ import { useForm } from '@tanstack/react-form';
 import { User } from '../types/user';
 import { Employee } from '../types/employee';
 import { empleadoService } from "../services/GestionEmpleadosService";
-
 interface UserFormProps {
   user?: User;
   onSave: (user: Omit<User, 'id'> | User) => void;
   onCancel: () => void;
 }
-
 type FormValues = {
   name: string;
   email: string;
@@ -17,7 +15,6 @@ type FormValues = {
   role: 'Usuario Comun' | 'Jefe de Departamento' | 'Jefe de RRHH';
   id_empleado: string | null;
 };
-
 const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
@@ -31,26 +28,19 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
       password: user?.password ?? '',
     },
     onSubmit: ({ value }: { value: FormValues }) => {
-      console.log('Datos antes de onSave:', value); // Depuración adicional
-      const baseUserData = {
+      console.log('Datos antes de onSave:', value);
+      const id_empleado = value.id_empleado && value.id_empleado !== ''
+        ? parseInt(value.id_empleado, 10)
+        : user?.id_empleado ?? undefined;
+      const userData = {
         ...value,
-        id_empleado:
-          value.id_empleado !== null && value.id_empleado !== ''
-            ? parseInt(value.id_empleado, 10)
-            : user?.id_empleado ?? undefined,
+        id_empleado,
+        ...(user?.id ? { id: user.id } : {}),
       };
-      // Ensure id_empleado is undefined if null
-      if (baseUserData.id_empleado === null) {
-        baseUserData.id_empleado = undefined;
-      }
-      const userData = user && typeof user.id === 'number'
-        ? { ...baseUserData, id: user.id }
-        : baseUserData;
-      console.log('Datos enviados a onSave:', userData); // Depuración final
+      console.log('Datos enviados a onSave:', userData);
       onSave(userData);
     },
   });
-
   useEffect(() => {
     setLoadingEmployees(true);
     empleadoService.getAll()
@@ -59,19 +49,13 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
       .finally(() => setLoadingEmployees(false));
   }, []);
 
-  useEffect(() => {
-    form.setFieldValue('name', user?.name ?? '');
-    form.setFieldValue('email', user?.email ?? '');
-    form.setFieldValue('password', user?.password ?? '');
-    form.setFieldValue('role', user?.role ?? 'Usuario Comun');
-    form.setFieldValue('id_empleado', user?.id_empleado?.toString() ?? null);
-  }, [user]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     form.handleSubmit();
   };
-
+  // El return permanece intacto
+  // ...
+// export default UserForm;
   return (
     <div className="fixed inset-0 backdrop-blur-xs flex items-center justify-center z-50">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
