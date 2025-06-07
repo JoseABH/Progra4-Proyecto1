@@ -25,11 +25,11 @@ const SolicitudesPage = () => {
   }
 
   const pendientes = permisos.filter(
-    (p) => p.estadoProceso === user.role && p.estadoGeneral === "Pendiente"
+    (p) => p.estadoProceso === user?.role && p.estadoGeneral === "Pendiente"
   );
 
   const otras = permisos.filter(
-    (p) => p.estadoProceso !== user.role || p.estadoGeneral !== "Pendiente"
+    (p) => p.estadoProceso !== user?.role || p.estadoGeneral !== "Pendiente"
   );
 
   const permisoActual = permisos.find((p) => p.id === seleccionado);

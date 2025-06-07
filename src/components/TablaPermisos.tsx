@@ -1,9 +1,4 @@
-import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-  ColumnDef,
-} from "@tanstack/react-table";
+import {useReactTable, getCoreRowModel,flexRender,ColumnDef,} from "@tanstack/react-table";
 import { Permiso } from "../types/Permiso";
 import { usePermisos } from "../hooks/usePermisos";
 import { useState, useMemo } from "react";
