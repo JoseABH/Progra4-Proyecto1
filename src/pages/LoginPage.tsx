@@ -14,10 +14,14 @@ export default function LoginPage() {
   
   const backgroundVideos = [
     "https://videos.pexels.com/video-files/27082301/12066745_2560_1440_30fps.mp4",
-    "https://videos.pexels.com/video-files/8902425/8902425-uhd_2732_1440_25fps.mp4",
+    "https://videos.pexels.com/video-files/31866769/13574257_1920_1080_25fps.mp4",
+    "https://videos.pexels.com/video-files/4310039/4310039-hd_1920_1080_24fps.mp4",
+    "https://videos.pexels.com/video-files/32059969/13665424_1920_1080_60fps.mp4",
     "https://videos.pexels.com/video-files/32082671/13675698_2560_1440_30fps.mp4",
-    "https://videos.pexels.com/video-files/4435750/4435750-uhd_2560_1440_25fps.mp4",
-    "https://videos.pexels.com/video-files/6981411/6981411-hd_1920_1080_25fps.mp4"
+    "https://videos.pexels.com/video-files/5827807/5827807-hd_1920_1080_25fps.mp4",
+    "https://videos.pexels.com/video-files/18084154/18084154-uhd_2560_1440_50fps.mp4",
+    "https://videos.pexels.com/video-files/13742271/13742271-hd_1920_1080_30fps.mp4",
+    "https://videos.pexels.com/video-files/6981418/6981418-hd_1920_1080_25fps.mp4",
   ];
 
   useEffect(() => {
@@ -70,12 +74,12 @@ export default function LoginPage() {
           {/* Contenido en primer plano */}
           <div className="relative z-20 w-full max-w-md px-4">
             <div className="text-center mb-4">
-              <h1 className="text-2xl font-semibold text-white">Sistema de Recursos Humanos</h1>
-              <p className="text-sm text-gray-300">Centro Agrícola de Puntarenas</p>
+              <h1 className="text-2xl font-semibold text-white"></h1>
+              <p className="text-sm text-gray-300"></p>
             </div>
             <Login />
             <div className="mt-6 text-center">
-              <p className="text-xs text-gray-300">&copy; {new Date().getFullYear()} Centro Agrícola de Puntarenas. & Ing. Sistemas / Prog. IV <br /> Todos los derechos reservados</p>
+              <p className="text-xs text-gray-300"> </p>
             </div>
           </div>
         </div>
