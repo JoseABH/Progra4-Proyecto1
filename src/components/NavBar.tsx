@@ -33,20 +33,27 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <div className="flex flex-col h-screen w-screen m-0">
             {/* Barra superior */}
             <header className="headerNav bg-sky-900 text-white px-6 flex items-center justify-between shadow m-1.5 rounded-lg">
-                <div className="text-2xl font-bold flex items-center gap-2">
-                    <img src="https://static.wixstatic.com/media/79ed12_8722dd62a5474ede83b761ba66cbf2f3~mv2.jpg/v1/fill/w_238,h_238,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/79ed12_8722dd62a5474ede83b761ba66cbf2f3~mv2.jpg" alt="logo" className="rounded-full w-12 " />
-                    {/* <MdMapsHomeWork />  */}
-                    Centro Agricola de Puntarenas
+                <div className="text-2xl font-bold flex items-center gap-3">
+                    <img 
+                        src="https://static.wixstatic.com/media/79ed12_8722dd62a5474ede83b761ba66cbf2f3~mv2.jpg/v1/fill/w_238,h_238,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/79ed12_8722dd62a5474ede83b761ba66cbf2f3~mv2.jpg" 
+                        alt="logo" 
+                        className="rounded-full w-12 h-12 border-2 border-white/20 shadow-lg transition-transform hover:scale-105" 
+                    />
+                    <span className="bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                        Centro Agricola de Puntarenas
+                    </span>
                 </div>
-                <div className="text-xl flex items-center gap-4">
-                    {user?.role} | {user?.name || "Invitado"}
-                    <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-xl text-black"
-                        style={{ backgroundColor: randomColor }}
-                    >{initials}
-
+                <div className="text-lg flex items-center gap-4">
+                    <div className="flex flex-col items-end">
+                        <span className="text-blue-200 text-sm font-medium">{user?.role}</span>
+                        <span className="text-white font-semibold">{user?.name || "Invitado"}</span>
                     </div>
-                    
+                    <div
+                        className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-gray-700 border-2 border-white/30 shadow-lg transition-transform hover:scale-110"
+                        style={{ backgroundColor: randomColor }}
+                    >
+                        {initials}
+                    </div>
                 </div>
                 {/* <FaUserCircle /> */}
       
