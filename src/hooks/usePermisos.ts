@@ -13,27 +13,21 @@ export function usePermisos() {
     });
   }, []);
 
-  const addPermiso = (nuevo: Omit<Permiso, "id">) => {
-    const nuevoConId: Permiso = {
-      id: Date.now(),
-      solicitadoEn: new Date().toISOString(),
-      ...nuevo,
-    };
-    const nuevos = [nuevoConId,...permisos];
-    setPermisos(nuevos);
-    permisoService.updateAll(nuevos);
+  const addPermiso = async (nuevo: Omit<Permiso, "id">) => {
+    const creado = await permisoService.create(nuevo);
+    setPermisos((prev) => [creado, ...prev]);
   };
 
-  const updatePermiso = (id: number, actualizado: Permiso) => {
-    const nuevos = permisos.map((p) => (p.id === id ? actualizado : p));
-    setPermisos(nuevos);
-    permisoService.updateAll(nuevos);
+  const updatePermiso = async (id: number, actualizado: Permiso) => {
+    await permisoService.update(id, actualizado);
+    setPermisos((prev) =>
+      prev.map((p) => (p.id === id ? actualizado : p))
+    );
   };
 
-  const deletePermiso = (id: number) => {
-    const nuevos = permisos.filter((p) => p.id !== id);
-    setPermisos(nuevos);
-    permisoService.updateAll(nuevos);
+  const deletePermiso = async (id: number) => {
+    await permisoService.delete(id);
+    setPermisos((prev) => prev.filter((p) => p.id !== id));
   };
 
   return { permisos, loading, addPermiso, updatePermiso, deletePermiso };

@@ -1,20 +1,31 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { Permiso } from "../types/Permiso";
 import { usePermisos } from "../hooks/usePermisos";
 import { AuthContext } from "../Context/AuthContext";
 
-const FormularioPermiso = ({ onSuccess, onClose }: { onSuccess?: () => void; onClose?: () => void }) => {
+const FormularioPermiso = ({
+  onSuccess,
+  onClose,
+}: {
+  onSuccess?: () => void;
+  onClose?: () => void;
+}) => {
   const { addPermiso } = usePermisos();
   const { user } = useContext(AuthContext)!;
-  
+  const [error, setError] = useState<string | null>(null);
 
+  // Determinar estadoProceso según rol actual (ajusta si cambias lógica)
+  const proceso =
+    user?.role === "Usuario Comun"
+      ? "Jefe de Departamento"
+      : user?.role === "Jefe de Departamento"
+      ? "Jefe de RRHH"
+      : "Jefe de RRHH";
 
-const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.role === "Jefe de Departamento" ? "Jefe de RRHH": "Jefe de RRHH";
-
-  const form = useForm<Omit<Permiso, "id">, any, any, any, any, any, any, any, any, any>({
+  const form = useForm<Omit<Permiso, "id">>({
     defaultValues: {
-      empleado: user.name,
+      empleado: user?.name,
       motivo: "",
       tipo: "Permiso personal" as const,
       fechaInicio: "",
@@ -23,29 +34,53 @@ const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.r
       estadoProceso: proceso,
     },
     onSubmit: async ({ value }) => {
-      await addPermiso(value);
-      onSuccess?.();
-      alert("Permiso creado correctamente");
-      onClose?.();
+      setError(null);
+      try {
+        await addPermiso(value); // addPermiso debe hacer POST al backend con la data
+        onSuccess?.();
+        alert("Permiso creado correctamente");
+        onClose?.();
+      } catch (e: any) {
+        // Mostrar error si falla la creación
+        setError(e?.message || "Error al crear la solicitud");
+      }
     },
   });
 
-
   return (
-    <div className="crearSolicitudP fixed inset-0 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl">
-        <h2 className="text-xl font-bold mb-4 text-center">Crear Solicitud de Permiso</h2>
+    <div className="crearSolicitudP fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 backdrop-blur-sm p-4">
+      <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-4xl border border-gray-100 max-h-[95vh] overflow-y-auto">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-2">
+            Crear Solicitud de Permiso
+          </h2>
+          <div className="w-20 h-1 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto rounded-full"></div>
+        </div>
+        
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center space-x-3">
+            <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xs font-bold">!</span>
+            </div>
+            <span>{error}</span>
+          </div>
+        )}
+        
         <form
           onSubmit={(e) => {
             e.preventDefault();
             e.stopPropagation();
             form.handleSubmit();
           }}
-          className="space-y-4"
+          className="space-y-8"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="empleado" className="block text-sm font-medium mb-1">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Empleado */}
+            <div className="space-y-2">
+              <label
+                htmlFor="empleado"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
                 Empleado
               </label>
               <form.Field
@@ -56,56 +91,35 @@ const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.r
               >
                 {({ state, handleChange, handleBlur }) => (
                   <div>
-                    <input
-                      id="empleado"
-                      name="empleado"
-                      placeholder="Nombre del empleado"
-                      value={state.value}
-                      onChange={(e) => handleChange(e.target.value)}
-                      onBlur={handleBlur}
-                      disabled={true}
-                      required
-                      className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <div className="relative">
+                      <input
+                        id="empleado"
+                        name="empleado"
+                        placeholder="Nombre del empleado"
+                        value={state.value}
+                        onChange={(e) => handleChange(e.target.value)}
+                        onBlur={handleBlur}
+                        disabled={true}
+                        required
+                        className="w-full bg-gray-50 border-2 border-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 font-medium text-gray-600"
+                      />
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      </div>
+                    </div>
                     {state.meta.errors && (
-                      <span className="text-red-500 text-xs mt-1">{state.meta.errors.join(", ")}</span>
+                      <span className="text-red-500 text-sm mt-2 block">
+                        {state.meta.errors.join(", ")}
+                      </span>
                     )}
                   </div>
                 )}
               </form.Field>
             </div>
-            <div>
-              <label htmlFor="motivo" className="block text-sm font-medium mb-1">
-                Motivo
-              </label>
-              <form.Field
-                name="motivo"
-                validators={{
-                  onChange: ({ value }) => (!value ? "El motivo es requerido" : undefined),
-                }}
-              >
-                {({ state, handleChange, handleBlur }) => (
-                  <div>
-                    <textarea
-                      id="motivo"
-                      name="motivo"
-                      placeholder="Motivo del permiso"
-                      value={state.value}
-                      onChange={(e) => handleChange(e.target.value)}
-                      onBlur={handleBlur}
-                      required
-                      rows={4}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {state.meta.errors && (
-                      <span className="text-red-500 text-xs mt-1">{state.meta.errors.join(", ")}</span>
-                    )}
-                  </div>
-                )}
-              </form.Field>
-            </div>
-            <div>
-              <label htmlFor="tipo" className="block text-sm font-medium mb-1">
+
+            {/* Tipo de permiso */}
+            <div className="space-y-2">
+              <label htmlFor="tipo" className="block text-sm font-semibold text-gray-700 mb-2">
                 Tipo de Permiso
               </label>
               <form.Field
@@ -116,59 +130,83 @@ const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.r
               >
                 {({ state, handleChange, handleBlur }) => (
                   <div>
-                    <select
-                      id="tipo"
-                      name="tipo"
-                      value={state.value}
-                      onChange={(e) =>
-                        handleChange(e.target.value as "Vacaciones" | "Permiso personal" | "Asuntos medicos")
-                      }
-                      onBlur={handleBlur}
-                      className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="Permiso personal">Permiso personal</option>
-                      <option value="Vacaciones">Vacaciones</option>
-                      <option value="Asuntos medicos">Asuntos Médicos</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        id="tipo"
+                        name="tipo"
+                        value={state.value}
+                        onChange={(e) =>
+                          handleChange(
+                            e.target.value as "Vacaciones" | "Permiso personal" | "Asuntos medicos"
+                          )
+                        }
+                        onBlur={handleBlur}
+                        className="w-full bg-white border-2 border-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 font-medium text-gray-700 appearance-none cursor-pointer"
+                      >
+                        <option value="Permiso personal">Permiso personal</option>
+                        <option value="Vacaciones">Vacaciones</option>
+                        <option value="Asuntos medicos">Asuntos Médicos</option>
+                      </select>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
                     {state.meta.errors && (
-                      <span className="text-red-500 text-xs mt-1">{state.meta.errors.join(", ")}</span>
+                      <span className="text-red-500 text-sm mt-2 block">
+                        {state.meta.errors.join(", ")}
+                      </span>
                     )}
                   </div>
                 )}
               </form.Field>
             </div>
-            <div>
-              <label htmlFor="fechaInicio" className="block text-sm font-medium mb-1">
-                Fecha Inicio
+
+            {/* Fecha Inicio */}
+            <div className="space-y-2">
+              <label
+                htmlFor="fechaInicio"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                Fecha de Inicio
               </label>
               <form.Field
                 name="fechaInicio"
                 validators={{
-                  onChange: ({ value }) => (!value ? "La fecha de inicio es requerida" : undefined),
+                  onChange: ({ value }) =>
+                    !value ? "La fecha de inicio es requerida" : undefined,
                 }}
               >
                 {({ state, handleChange, handleBlur }) => (
                   <div>
-                    <input
-                      id="fechaInicio"
-                      name="fechaInicio"
-                      type="date"
-                      value={state.value}
-                      onChange={(e) => handleChange(e.target.value)}
-                      onBlur={handleBlur}
-                      required
-                      className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <div className="relative">
+                      <input
+                        id="fechaInicio"
+                        name="fechaInicio"
+                        type="date"
+                        value={state.value}
+                        onChange={(e) => handleChange(e.target.value)}
+                        onBlur={handleBlur}
+                        required
+                        className="w-full bg-white border-2 border-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 font-medium text-gray-700"
+                      />
+                     
+                    </div>
                     {state.meta.errors && (
-                      <span className="text-red-500 text-xs mt-1">{state.meta.errors.join(", ")}</span>
+                      <span className="text-red-500 text-sm mt-2 block">
+                        {state.meta.errors.join(", ")}
+                      </span>
                     )}
                   </div>
                 )}
               </form.Field>
             </div>
-            <div>
-              <label htmlFor="fechaFin" className="block text-sm font-medium mb-1">
-                Fecha Fin
+
+            {/* Fecha Fin */}
+            <div className="space-y-2">
+              <label htmlFor="fechaFin" className="block text-sm font-semibold text-gray-700 mb-2">
+                Fecha de Finalización
               </label>
               <form.Field
                 name="fechaFin"
@@ -185,18 +223,23 @@ const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.r
               >
                 {({ state, handleChange, handleBlur }) => (
                   <div>
-                    <input
-                      id="fechaFin"
-                      name="fechaFin"
-                      type="date"
-                      value={state.value}
-                      onChange={(e) => handleChange(e.target.value)}
-                      onBlur={handleBlur}
-                      required
-                      className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <div className="relative">
+                      <input
+                        id="fechaFin"
+                        name="fechaFin"
+                        type="date"
+                        value={state.value}
+                        onChange={(e) => handleChange(e.target.value)}
+                        onBlur={handleBlur}
+                        required
+                        className="w-full bg-white border-2 border-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 font-medium text-gray-700"
+                      />
+                     
+                    </div>
                     {state.meta.errors && (
-                      <span className="text-red-500 text-xs mt-1">{state.meta.errors.join(", ")}</span>
+                      <span className="text-red-500 text-sm mt-2 block">
+                        {state.meta.errors.join(", ")}
+                      </span>
                     )}
                   </div>
                 )}
@@ -204,19 +247,66 @@ const proceso = user.role === "Usuario Comun" ?  "Jefe de Departamento" : user.r
             </div>
           </div>
 
-          <div className="flex justify-between mt-6">
+          {/* Motivo - Campo completo */}
+          <div className="space-y-2">
+            <label htmlFor="motivo" className="block text-sm font-semibold text-gray-700 mb-2">
+              Motivo del Permiso
+            </label>
+            <form.Field
+              name="motivo"
+              validators={{
+                onChange: ({ value }) => (!value ? "El motivo es requerido" : undefined),
+              }}
+            >
+              {({ state, handleChange, handleBlur }) => (
+                <div>
+                  <div className="relative">
+                    <textarea
+                      id="motivo"
+                      name="motivo"
+                      placeholder="Describe el motivo de tu solicitud de permiso..."
+                      value={state.value}
+                      onChange={(e) => handleChange(e.target.value)}
+                      onBlur={handleBlur}
+                      required
+                      rows={4}
+                      className="w-full bg-white border-2 border-gray-200 px-4 py-3 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 font-medium text-gray-700"
+                    />
+                    <div className="absolute right-3 top-3 pointer-events-none">
+                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </div>
+                  </div>
+                  {state.meta.errors && (
+                    <span className="text-red-500 text-sm mt-2 block">
+                      {state.meta.errors.join(", ")}
+                    </span>
+                  )}
+                </div>
+              )}
+            </form.Field>
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-center gap-4 pt-6 border-t border-gray-100">
             <button
               type="submit"
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center space-x-2"
             >
-              Crear Solicitud
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              <span>Crear Solicitud</span>
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700"
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-8 py-3 rounded-xl transition-all duration-200 font-semibold hover:shadow-md flex items-center justify-center space-x-2"
             >
-              Cerrar
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <span>Cancelar</span>
             </button>
           </div>
         </form>

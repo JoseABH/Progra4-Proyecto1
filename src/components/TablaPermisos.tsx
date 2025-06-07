@@ -1,14 +1,9 @@
-import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-  ColumnDef,
-} from "@tanstack/react-table";
+import {useReactTable, getCoreRowModel,flexRender,ColumnDef,} from "@tanstack/react-table";
 import { Permiso } from "../types/Permiso";
 import { usePermisos } from "../hooks/usePermisos";
 import { useState, useMemo } from "react";
 import {Trash2 } from "lucide-react";
-
+import Loading from './Loading';
 const TablaPermisos = () => {
   const { permisos, loading, deletePermiso } = usePermisos();
   const [filtroGlobal, setFiltroGlobal] = useState("");
@@ -96,7 +91,7 @@ const TablaPermisos = () => {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  if (loading) return <div className="text-gray-700">Cargando...</div>;
+  if (loading) return <div className="text-gray-700"><Loading></Loading></div>;
 
   return (
     <div className="overflow-x-auto bg-white border border-gray-200 rounded-lg p-4">

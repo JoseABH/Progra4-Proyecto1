@@ -10,8 +10,9 @@ import {
 import { EstadisticasSolicitudes } from "./EstadisticasSolicitudes";
 import { EstadisticasEmpleados } from "../components/EstadisticasEmpleados";
 import { AuthContext } from '../Context/AuthContext';
-import { getEmpleadoById } from '../services/GestionEmpleadosService';
+import { empleadoService } from "../services/GestionEmpleadosService";
 import { Employee } from '../types/employee';
+import Loading from './Loading';
 
 export const UserDashboard = () => {
   const { user } = useContext(AuthContext)!;
@@ -21,100 +22,114 @@ export const UserDashboard = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Si no tenemos user o user.id, no hacemos nada
+    if (!user || !user.id) {
+      setError("Usuario no válido");
+      setLoading(false);
+      return;
+    }
+
     (async () => {
+      setLoading(true);
       try {
-        const emp = await getEmpleadoById(user.id_empleado);
+        // Convertimos user.id (string) a number antes de pasarlo a getById
+        const emp = await empleadoService.getById(Number(user.id));
         setEmpleado(emp);
-      } catch {
-        setError('Error cargando datos del empleado');
+        setError(null);
+      } catch (err) {
+        console.error("Error cargando datos del empleado:", err);
+        setError("Error cargando datos del empleado");
       } finally {
         setLoading(false);
       }
     })();
-  }, [user.id_empleado]);
+  }, [user]);
 
-  if (loading) return <div className="p-8"><div className="p-6 flex  justify-center items-center h-screen">
-    <div className="flex items-center justify-center h-screen">
-      <div className="w-80 p-5 rounded-xl shadow-lg bg-white animate-pulse space-y-3">
-        <div className="h-6 w-2/3 bg-slate-300 rounded" />
-        <div className="h-4 w-full bg-slate-300 rounded" />
-        <div className="h-4 w-5/6 bg-slate-300 rounded" />
-        <div className="h-4 w-4/6 bg-slate-300 rounded" />
-        <div className="h-4 w-2/3 bg-slate-300 rounded" />
-        <p>Cargando datos...</p>
-      </div>
+  if (loading) return <Loading></Loading>;
+  if (error) return <div className="p-8 text-red-500 bg-red-50 border border-red-200 rounded-lg mx-6">{error}</div>;
+  if (!empleado) return <div className="p-8 text-gray-600 bg-gray-50 border border-gray-200 rounded-lg mx-6">Empleado no encontrado.</div>;
 
-    </div>
-
-  </div></div>;
-  if (error) return <div className="p-8 text-red-600">{error}</div>;
-  if (!empleado) return <div className="p-8">Empleado no encontrado.</div>;
-
-  const initials = empleado.nombre
+  //const initials = empleado.nombre
+  const initials = user?.name
     .split(' ')
     .map((n: string) => n[0])
     .slice(0, 2)
     .join('');
   const randomColor = `hsl(${Math.floor(Math.random() * 360)}, 70%, 80%)`;
+
   return (
-    <div className="p-6 min-h-full bg-gray-50">
+    <div className="p-2 min-h-full bg-gray-50">
       {/* Contenedor principal */}
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col lg:flex-row gap-5">
         {/* Columna izquierda: bienvenida + info */}
         <div className="flex-1 space-y-6">
           {/* Bienvenida */}
-          <div>
-            <h1 className="text-4xl font-bold mb-2">Bienvenido, {empleado.nombre}</h1>
-            <p className="text-gray-600">Gestione su información personal.</p>
+          <div className="bg-sky-900 text-white p-4 rounded-lg shadow-md">
+            <h1 className="text-2xl font-bold mb-2">
+              Bienvenido, {empleado.nombre}
+            </h1>
+            <p className="text-blue-100">Gestione su información personal.</p>
           </div>
 
           {/* Información personal */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm relative">
-            <span className="absolute top-6 right-6 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm relative">
+            <span className="absolute top-4 right-4 px-3 py-1 bg-green-500 text-white rounded-full text-xs font-medium">
               {empleado.estado}
             </span>
-            <h2 className="text-lg font-semibold mb-4">Información Personal</h2>
+            
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Información Personal</h2>
 
             <div className="flex items-center space-x-4 mb-6">
               <div
-                className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-xl text-gray-500"
+                className="w-16 h-16 rounded-full flex items-center justify-center text-lg font-bold text-gray-700 border-2 border-gray-200"
                 style={{ backgroundColor: randomColor }}
               >
                 {initials}
               </div>
               <div>
-                <h3 className="text-xl font-bold">{empleado.nombre}</h3>
-                <p className="text-gray-500">{empleado.cargo}</p>
+                <h3 className="text-xl font-bold text-gray-900">{empleado.nombre}</h3>
+                <p className="text-blue-600 font-medium">{empleado.cargo}</p>
               </div>
             </div>
 
             <div className="space-y-3">
-              <div className="flex items-center border border-gray-200 rounded-lg p-4">
-                <FaEnvelope className="text-gray-400 w-5 h-5" />
+              <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <FaEnvelope className="text-white w-4 h-4" />
+                </div>
                 <div className="ml-3">
-                  <p className="text-xs text-gray-500">Correo electrónico</p>
-                  <p className="text-gray-700">{empleado.correo}</p>
+                  <p className="text-xs text-gray-500 font-medium">Correo electrónico</p>
+                  <p className="text-gray-800">{empleado.correo}</p>
                 </div>
               </div>
-              <div className="flex items-center border border-gray-200 rounded-lg p-4">
-                <FaBuilding className="text-gray-400 w-5 h-5" />
+              
+              <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                  <FaBuilding className="text-white w-4 h-4" />
+                </div>
                 <div className="ml-3">
-                  <p className="text-xs text-gray-500">Departamento</p>
-                  <p className="text-gray-700">{empleado.departamento}</p>
+                  <p className="text-xs text-gray-500 font-medium">Departamento</p>
+                  <p className="text-gray-800">{empleado.departamento}</p>
                 </div>
               </div>
-              <div className="flex items-center border border-gray-200 rounded-lg p-4">
-                <FaBriefcase className="text-gray-400 w-5 h-5" />
+              
+              <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                  <FaBriefcase className="text-white w-4 h-4" />
+                </div>
                 <div className="ml-3">
-                  <p className="text-xs text-gray-500">Cargo</p>
-                  <p className="text-gray-700">{empleado.cargo}</p>
+                  <p className="text-xs text-gray-500 font-medium">Cargo</p>
+                  <p className="text-gray-800">{empleado.cargo}</p>
                 </div>
               </div>
-              <div className="flex items-center border border-gray-200 rounded-lg p-4">
-                <FaRegIdCard className="text-gray-400 w-5 h-5" />
+              
+              <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+                  <FaRegIdCard className="text-white w-4 h-4" />
+                </div>
                 <div className="ml-3">
-                  <p className="text-xs text-gray-500">ID</p>
-                  <p className="text-gray-700">{empleado.id}</p>
+                  <p className="text-xs text-gray-500 font-medium">ID</p>
+                  <p className="text-gray-800">{empleado.id}</p>
                 </div>
               </div>
             </div>
@@ -122,15 +137,28 @@ export const UserDashboard = () => {
         </div>
 
         {/* Columna derecha: estadísticas */}
-        <div className="flex flex-col gap-12 w-full lg:w-80">
-          <EstadisticasEmpleados />
-          <EstadisticasSolicitudes />
+        <div className="flex flex-col gap-6 w-full lg:w-80">
+          {
+            user?.role === "Jefe de RRHH" || user?.role === "admin" ? (
+              <>
+                <EstadisticasEmpleados />
+                <EstadisticasSolicitudes />
+              </>
+            ) : user?.role === "Jefe de Departamento" ? (
+              <>
+                <EstadisticasSolicitudes />
+              </>
+            ) : user?.role === "Usuario Comun" ? (
+              <div className="bg-white border border-gray-200 rounded-lg p-6 text-center">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <FaRegIdCard className="text-white w-6 h-6" />
+                </div>
+                <p className="text-gray-600">No tienes estadísticas disponibles</p>
+              </div>
+            ) : null
+          }
         </div>
       </div>
     </div>
-
-
-
-
   );
 };

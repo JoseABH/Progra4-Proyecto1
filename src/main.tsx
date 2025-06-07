@@ -1,19 +1,27 @@
-import { createRoot } from 'react-dom/client'
-import './index.css'
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
 
-import { AuthProvider } from './Context/AuthContext'
-import { RouterProvider } from '@tanstack/react-router'
-import router from './routes'
+import { AuthProvider } from './Context/AuthContext';
+import { RouterProvider } from '@tanstack/react-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const rootElement = document.getElementById('root')
+import router from './routes';
 
-if (!rootElement) throw new Error('No se encontró el elemento root en el HTML')
+const rootElement = document.getElementById('root');
 
-const root = createRoot(rootElement)
+if (!rootElement) throw new Error('No se encontró el elemento root en el HTML');
+
+const root = createRoot(rootElement);
+
+const queryClient = new QueryClient();
 
 root.render(
-  <AuthProvider>
-
-    <RouterProvider router={router} />
-  </AuthProvider>
-)
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </QueryClientProvider>
+  </React.StrictMode>
+);
